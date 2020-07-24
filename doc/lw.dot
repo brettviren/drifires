@@ -1,0 +1,82 @@
+digraph lw {
+        label="Components, input and outputs for larwires"
+        subgraph cluster_geom {
+                Periodicity
+                Wires
+                Potentials
+                Plane[label="Planes"]
+                label="2D analytical geometry"
+        }
+
+        Readout[label="Readouts\n(w. field by wire name)"]
+        Area3d[label="Area3d\n(calc range)"]
+        Electrode[label="Electrodes\n(sig by wire name)"]
+
+        node[shape=invhouse]
+        Impacts[label="Impact(s)"]
+        TimeWindow[label="Time Window\n(resp bounds)"]
+        Accuracy[label="Accuract\n(eg 0.0001 cm)"]
+        MaxStep[label="Max step size\n(eg 0.1 cm)"]
+        
+
+        node[shape=box]
+        Medium[label="Medium (LAr)\n(velo calc)"]
+        Component[label="Component\n(field calc)"]
+        Sensor[label="Sensor\n(resp calc)"]
+        Drift[label="Drift\n(drift calc)"]
+
+        subgraph cluster_plots {
+                label="Plotting"
+                Area2d[shape=ellipse,label="Area2d\n(plot range)"]
+                node[shape=octagon]
+                Canvas
+                ViewSignal
+                ViewField
+                ViewCell
+                ViewMedium
+                ViewDrift
+        }
+        
+        node[shape=folder]
+        Paths[label="Path(s)"]
+        Response[label="Response(s)\n(all paths)"]
+
+        Readout->Electrode[dir=none,style=dashed,label="same wire name"]
+
+        Medium->ViewMedium
+        Canvas->ViewMedium
+        Canvas->ViewDrift
+        Area2d->ViewMedium
+        Medium->Component
+        Potentials->Component
+        Wires->Component[label="name"]
+        Plane->Component
+        Readout->Component
+        Periodicity->Component
+        Component->Sensor
+        Electrode->Sensor
+        TimeWindow->Sensor
+        Area3d->Sensor
+
+        Sensor->Drift[dir=both]
+        Accuracy->Drift
+        MaxStep->Drift
+        Drift->ViewDrift
+        Impacts->Drift[label="x,y,z,t"]
+        Drift->Paths
+
+
+        Component->ViewCell
+        Area2d->ViewCell
+        Canvas->ViewCell
+
+        Sensor->ViewField
+        Area2d->ViewField
+        Canvas->ViewField
+
+        Sensor->ViewSignal
+        Area2d->ViewSignal
+        Canvas->ViewSignal
+        
+        Sensor->Response[label="wire name\nand T-bin"]
+}

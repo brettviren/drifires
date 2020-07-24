@@ -1,0 +1,11 @@
+#+title: drifires - a drift/field responses calculator 
+
+* Overview
+
+~drifiers~ calculates drift paths and field responses on electrodes as
+induced current.  The heavy lifting is done by Garfield++.  ~libdrifers~
+provides support for LAr and parameterized models for geometries
+related to typical LArTPC detectors.  The ~drifiers~ command line
+interface produces diagnostic output and response data suitable for
+use with Wire-Cell Toolkit.
+
