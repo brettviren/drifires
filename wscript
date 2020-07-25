@@ -43,18 +43,25 @@ def have_hlib(cfg, name, header):
               use=NAME, uselib_store=NAME, mandatory=True)
 
 def configure(cfg):
-    cfg.env.CXXFLAGS += ['-std=c++17', '-ggdb3', '-Wall', '-Wpedantic', '-Werror']
+    cfg.env.CXXFLAGS += ['-std=c++17', '-ggdb3',
+                         '-Wall', '-Wpedantic', '-Werror']
     cfg.load('compiler_cxx')
 
 
     have_hlib(cfg, 'nljs', 'nlohmann/json.hpp')
     have_lib(cfg, 'garfieldpp', 'Garfield/Medium.hh', ['Garfield'])
-    have_lib(cfg, 'root', 'Rtypes.h', ['Core', 'Graf', 'Hist', 'Graf3d', 'Gpad', 'Geom', 'Matrix', 'MathCore'])
+    have_lib(cfg, 'root', 'Rtypes.h', [
+        'Core', 'Graf', 'Hist', 'Graf3d', 'Gpad', 'Geom', 'Matrix', 'MathCore'])
 
 
 
 def build(bld):
     uses='NLJS GARFIELDPP ROOT'.split()
+
+    rpath = [bld.env["PREFIX"] + '/lib',
+             bld.path.find_or_declare(bld.out_dir)]
+    #rpath += [bld.env["LIBPATH_%s"%u][0] for u in uses]
+    rpath = list(set(rpath))    
 
     sources = bld.path.ant_glob('src/*.cpp')
     bld.shlib(features='cxx', includes='inc', 
@@ -66,11 +73,18 @@ def build(bld):
                       cwd=bld.path.find_dir('inc/drifires'),
                       install_path=bld.env.PREFIX + '/lib',
                       relative_trick=True)                      
+
     for one in bld.path.ant_glob('apps/*.cpp'):
-        print (one.name)
         bld.program(features = 'cxx',
                     includes = '../inc .',
                     source = [one],
                     target = one.name.replace('.cpp',''),
-                    rpath = [bld.env.LIBDIR],
-                    use = uses)
+                    rpath = rpath,
+                    use = ['drifires'] + uses)
+
+    bld.program(features = 'cxx',
+                includes = '../inc .',
+                source = bld.path.ant_glob('test/test_*.cpp'),
+                target = 'drifires-test',
+                rpath = rpath,
+                use = ['drifires'] + uses)
