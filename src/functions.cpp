@@ -3,8 +3,6 @@
 #include "drifires/drifter.hpp"
 #include "drifires/action.hpp"
 
-#include <iostream>
-
 struct Point { double x,y,z,t; };
 void from_json(const drifires::object j, Point& p)
 {
@@ -18,14 +16,10 @@ drifires::object drifires::process(drifires::object cfg)
 {
     auto& cmp = drifires::component(cfg["component"]);
     auto& dft = drifires::drifter(cfg["drifter"]);
-    dft.SetSensor(cmp.sensor());
+    dft.set_sensor(cmp.sensor());
 
     drifires::object ret;
 
-    for (auto actcfg : cfg["actions"]) {
-        auto& act = drifires::action(actcfg);
-        auto one = act.act(cmp, dft);
-        ret.push_back(one);
-    }
-    return ret;
+    auto& action = drifires::action(cfg["action"]);
+    return action.act(cmp, dft);
 }

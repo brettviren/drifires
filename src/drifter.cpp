@@ -1,5 +1,8 @@
 #include "drifires/drifter.hpp"
+#include "drifires/util.hpp"
 #include "Garfield/DriftLineRKF.hh"
+
+#include <iostream>
 
 struct RkfCfg {
     drifires::TypeName tn;
@@ -17,21 +20,29 @@ void from_json(const drifires::object& j, RkfCfg& c)
 struct driftlinerkf : public drifires::Drifter {
     Garfield::DriftLineRKF rkf;
 
-    virtual void SetSensor(Garfield::Sensor &sensor) {
+    virtual void set_sensor(Garfield::Sensor &sensor) {
         rkf.SetSensor(&sensor);
         rkf.EnableSignalCalculation();
     }
-    virtual void EnablePlotting(Garfield::ViewDrift& driftView) {
+    virtual void enable_plotting(Garfield::ViewDrift& driftView) {
         rkf.EnablePlotting(&driftView);
     }
-    virtual void DriftElectron(double x, double y, double z, double t) {
-        rkf.DriftElectron(x,y,z,t);
+    virtual void drift_electron(double x, double y, double z, double t) {
+        bool ok = rkf.DriftElectron(x/gfunits::length,
+                                    y/gfunits::length,
+                                    z/gfunits::length,
+                                    t/gfunits::time);
+        if (!ok) {
+            throw std::runtime_error("failed to drift");
+        }
     }
 
     virtual void configure(drifires::object obj) {
         RkfCfg cfg = obj;
-        rkf.SetIntegrationAccuracy(cfg.accuracy);
-        rkf.SetMaximumStepSize(cfg.maxstep);
+        std::cerr << "RKF: acc=" << cfg.accuracy/units::mm
+                  << " mm, max step=" << cfg.maxstep/units::mm << " mm" << std::endl;
+        rkf.SetIntegrationAccuracy(cfg.accuracy/gfunits::length);
+        rkf.SetMaximumStepSize(cfg.maxstep/gfunits::length);
         rkf.RejectKinks(true);
     }
 };

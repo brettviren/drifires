@@ -4,6 +4,8 @@
 
 #include "Garfield/ComponentAnalyticField.hh"
 
+#include <iostream>
+
 struct AWLayer {
     std::string name;
     double loc;                 // cm, location in y
@@ -89,7 +91,14 @@ struct AnalyticWire2D : public drifires::Component {
                     double wx = w0 + iwire * layer.pitch;
                     const int nrel = iwire - nwires/2;
                     auto nam = drifires::wire_name(layer.name, nrel);
-                    cmp.AddWire(wx, layer.loc, layer.dia, layer.pot, nam);
+                    std::cerr << "add wire: " << nam
+                              << " nrel:"<<nrel<<" iwire:"<<iwire
+                              << " wx:"<<wx
+                              << " w0:"<<w0 <<std::endl;
+                    cmp.AddWire(wx/gfunits::length,        // x
+                                layer.loc/gfunits::length, // y
+                                layer.dia/gfunits::length, // diameter
+                                layer.pot/gfunits::pot, nam); // potential
                     if (layer.readout) {
                         cmp.AddReadout(nam);
                         sens.AddElectrode(&cmp, nam);
@@ -98,7 +107,7 @@ struct AnalyticWire2D : public drifires::Component {
                 }
             }
             else {              // plane
-                cmp.AddPlaneY(layer.loc, layer.pot, layer.name);
+                cmp.AddPlaneY(layer.loc/gfunits::length, layer.pot/gfunits::pot, layer.name);
                 if (layer.readout) {
                     cmp.AddReadout(layer.name);
                     sens.AddElectrode(&cmp, layer.name);
@@ -107,7 +116,7 @@ struct AnalyticWire2D : public drifires::Component {
             }
         }
 
-        cmp.SetPeriodicityX(cfg.periodicity);
+        cmp.SetPeriodicityX(cfg.periodicity/gfunits::length);
         bb.resize(3);
         bb[0].first  = -cfg.periodicity/2.0;
         bb[0].second =  cfg.periodicity/2.0;

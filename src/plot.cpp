@@ -1,4 +1,5 @@
 #include "drifires/action.hpp"
+#include "drifires/util.hpp"
 
 #include "Garfield/ViewDrift.hh"
 #include "Garfield/ViewCell.hh"
@@ -24,25 +25,28 @@ struct PlotDrifts : public Action {
     virtual object act(Component& cmp, Drifter& dft) {
         auto& sens = cmp.sensor();
         sens.SetArea();
-        sens.SetTimeWindow(trange.lo, trange.binsize(), trange.nbins);
+        sens.SetTimeWindow(trange.lo/gfunits::time,
+                           trange.binsize()/gfunits::time, trange.nbins);
 
         
         Garfield::ViewDrift driftView;
-        dft.EnablePlotting(driftView);
+        dft.enable_plotting(driftView);
         auto bb = cmp.bounds();
-        driftView.SetArea(bb[0].first, bb[1].first,
-                          bb[0].second,bb[1].second);
+        driftView.SetArea(bb[0].first/gfunits::length,
+                          bb[1].first/gfunits::length,
+                          bb[0].second/gfunits::length,
+                          bb[1].second/gfunits::length);
 
         auto impacts = drange.edges();
         for (const auto& imp : impacts) {
-            std::cout << "drift: x="<<imp << std::endl;
-            dft.DriftElectron(imp, ystart, 0, 0);
+            std::cerr << "drift: x="<<imp/units::mm << " mm" << std::endl;
+            dft.drift_electron(imp, ystart, 0, 0);
         }
 
         auto pdf = cfg["pdf"].get<std::string>();
 
         std::cerr << "Making canvas\n";
-        TCanvas canvas("c", "", 600, 600); // leak
+        TCanvas canvas("c", "", 600, 600); // pixels
 
         canvas.Print(Form("%s[", pdf.c_str()),"pdf");
         driftView.SetCanvas(&canvas);
@@ -59,8 +63,14 @@ struct PlotDrifts : public Action {
             double ymax=area["ymax"];
             
             canvas.Clear();
-            driftView.SetArea(xmin, ymin, xmax, ymax);
-            cellView.SetArea(xmin, ymin, xmax, ymax);
+            driftView.SetArea(xmin/gfunits::length,
+                              ymin/gfunits::length,
+                              xmax/gfunits::length,
+                              ymax/gfunits::length);
+            cellView.SetArea(xmin/gfunits::length,
+                             ymin/gfunits::length,
+                             xmax/gfunits::length,
+                             ymax/gfunits::length);
             driftView.SetCanvas(&canvas);
             driftView.Plot(true);
             cellView.Plot2d();

@@ -5,7 +5,6 @@
 #include <functional>
 #include <string>
 #include <map>
-#include <iostream>
 
 #include "drifires/object.hpp"
 

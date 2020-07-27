@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     auto res = drifires::process(cfg);
     
     std::ofstream out(outfile);
-    out << res;
+    out << res.dump(4);
     
     return 0;
 }

@@ -11,9 +11,9 @@ namespace drifires {
     // Garfield doesn't have a base for drifting.  Try to soak up that
     // here.
     struct Drifter {
-        virtual void SetSensor(Garfield::Sensor &sensor) = 0;
-        virtual void EnablePlotting(Garfield::ViewDrift& driftView) = 0;
-        virtual void DriftElectron(double x, double y, double z, double t) = 0;
+        virtual void set_sensor(Garfield::Sensor &sensor) = 0;
+        virtual void enable_plotting(Garfield::ViewDrift& driftView) = 0;
+        virtual void drift_electron(double x, double y, double z, double t) = 0;
 
         virtual void configure(object cfg) = 0;
     };

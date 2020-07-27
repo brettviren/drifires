@@ -9,3 +9,53 @@ related to typical LArTPC detectors.  The ~drifiers~ command line
 interface produces diagnostic output and response data suitable for
 use with Wire-Cell Toolkit.
 
+* Install
+
+** Requirements
+
+- C++ compiler, Python (for "waf")
+- ~nlohmann::json~
+- ROOT
+- Garfield++
+- Jsonnet compiler (to regenerate configs)
+
+** Build
+
+#+begin_example
+  $ wget -O waf https://waf.io/waf-2.0.20
+  $ chmod +x waf
+  $ ./waf configure build install \
+     --prefix          $HOME/opt/drifires \
+     --with-nljs       $HOME/opt/nljs \
+     --with-garfieldpp $HOME/opt/garfieldpp \
+     --with-root       $HOME/opt/root
+#+end_example
+
+Adjust paths to match your environment.
+
+* Running
+
+~drifiers-cli~ provides a command line interface to the functionality
+which is fully driven by configuration.  Example configuration is
+provided.  Eg:
+
+#+begin_example
+  $ jsonnet test/pdsp.jsonnet | drifires-cli > pdsp-response.json
+  $ bzip2 pdsp-response.json
+#+end_example
+
+With Wire-Cell Toolkit Python available one may plot the result:
+
+#+begin_example
+ $ wirecell-sigproc plot-response pdsp-response.json.bz2 pdsp-response.png
+#+end_example
+
+* Library
+
+- *all* numeric quantities are on Wire-Cell Toolkit system of units (aka what CLHEP uses and NOT what Garfield++ uses)
+
+- classes which wrap Garfield++ classes and export Garfield++ methods do so changing their names from CamelCase to ~snake_case~.
+
+- a factory mechanism is used to construct instances of these classes.  A "type" must be given and an optional instance "name" may be given.  The "type" is not necessarily matching any C++ class name.
+
+
