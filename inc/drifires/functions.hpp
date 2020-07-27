@@ -1,13 +1,13 @@
 #ifndef DRIFIRES_FUNCTIONS_HPP
 #define DRIFIRES_FUNCTIONS_HPP
 
-#include "nlohmann/json.hpp"
+#include "drifires/object.hpp"
 
 namespace drifires {
-    using json = nlohmann::json;
 
     // Process directives and return results
-    json process(json cfg);
+    drifires::object process(drifires::object cfg);
+
 }
 
 #endif

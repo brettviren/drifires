@@ -1,5 +1,9 @@
 #include "drifires/functions.hpp"
 
+#include "Garfield/Plotting.hh"
+
+#include "TApplication.h"
+
 #include <iostream>
 #include <fstream>
 
@@ -26,10 +30,12 @@ int main(int argc, char* argv[])
         std::cerr << "faile to open: " << cfgfile << std::endl;
         return -1;
     }
-    drifires::json cfg;
+    drifires::object cfg;
     fstr >> cfg;
 
-    // brain dead factory method
+    // TApplication app("app", &argc, argv);
+    // Garfield::plottingEngine.SetDefaultStyle();
+
     auto res = drifires::process(cfg);
     
     std::ofstream out(outfile);

@@ -3,9 +3,11 @@
 
 #include <exception>
 #include <functional>
-#include <memory>
 #include <string>
 #include <map>
+#include <iostream>
+
+#include "drifires/object.hpp"
 
 namespace drifires {
 
@@ -23,12 +25,12 @@ namespace drifires {
       public:
 
         using type = Type;
-        using pointer = std::shared_ptr<Type>;
+        using pointer = Type*;
         using maker_f = std::function<Type*()>;
 
         Factory(std::string tname)
             : m_typename{tname}
-            , m_maker{[] { return new Type; }}
+            , m_maker{[]{ return nullptr; }}
         {}
         virtual ~Factory() {}
 
@@ -45,7 +47,10 @@ namespace drifires {
         pointer get(const std::string& name="") {
             auto it = m_objects.find(name);
             if (it == m_objects.end()) {
-                pointer p(new Type);
+                pointer p = m_maker();
+                if (p == nullptr) {
+                    throw FactoryException("maker failed for " + type_name() + ":" + name);
+                }
                 m_objects[name] = p;
                 return p;
             }
@@ -79,6 +84,25 @@ namespace drifires {
         }
         return *ret;
     }
+
+    template<class Type>
+    Type& factory_get(drifires::object tnobj) {
+        auto tn = tnobj.get<TypeName>();
+        Type* ret = factory<Type>(tn.type).get(tn.name);
+        if (ret == nullptr) {
+            throw FactoryException("no instance " + tn.type + ":" + tn.name);
+        }
+        return *ret;
+    }
+
+    template<class Type>
+    Type& factory_getcfg(drifires::object cfg) {
+        TypeName tn = cfg.get<TypeName>();
+        Type* ret = factory<Type>(tn.type).get(tn.name);
+        ret->configure(cfg);
+        return *ret;
+    }
+
 }
 
 
