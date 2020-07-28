@@ -93,6 +93,7 @@ local plane_locations = {
 };
 
 
+function(action = "response") 
 {
     // A drifires component constructs a Garfield ComponentBase.
     // Except for type: and optional name: the rest of the parameters
@@ -115,10 +116,10 @@ local plane_locations = {
         
         accuracy: integration_accuracy, // cm
         maxstep: maxstep,       // cm
-
+        throw_ok: true,        // false=ignore garfield++ failures
     },
 
-    action: self.actions.response,
+    action: self.actions[action],
 
     actions: {
         plot_drifts : {
@@ -128,11 +129,21 @@ local plane_locations = {
             local ymax = response_plane,
             local ymin = -2*plane_gap,
             pdf: "pdsp-drifts.pdf",
-            areas: [{xmin:-0.6*units.cm, ymin:-0.6*units.cm, xmax:0.6*units.cm, ymax:1.5*units.cm},
+            areas: [{xmin:-0.6*units.cm, ymin:-0.1*units.cm, xmax:0.6*units.cm, ymax:2.0*units.cm},
                     {xmin:xmin, ymin:ymin, xmax:xmax, ymax:ymax}],
             ystart: response_plane,
             trange: trange,
-            drange: { lo:-wire_pitch, hi:+wire_pitch, nbins:42},
+
+            // Hit nominal and "nudged" impacts across two wire regions.
+            local impact_pitch = wire_pitch/10.0,
+            impacts: std.sort( [ 0.0, -nudge, +nudge,
+                                 -wire_pitch+nudge, wire_pitch-nudge,
+                                 -0.5*wire_pitch-nudge, -0.5*wire_pitch+nudge, 
+                                 +0.5*wire_pitch+nudge, +0.5*wire_pitch-nudge ]
+                               + [ -impact_pitch*n for n in std.range(1,10) ]
+                               + [ impact_pitch*n for n in std.range(1,10)])
+
+
         } ,
         response : {
             type: "HalfRegionResponse",

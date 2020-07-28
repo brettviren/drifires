@@ -1,5 +1,7 @@
 #include "drifires/object.hpp"
 
+using drifires::maybe_to;
+
 void drifires::to_json(object& j, const drifires::TypeName& tn)
 {
     j = object({{"type",tn.type}});
@@ -10,12 +12,7 @@ void drifires::to_json(object& j, const drifires::TypeName& tn)
 void drifires::from_json(const object& j, drifires::TypeName& tn)
 { 
     j.at("type").get_to(tn.type);
-    if (j.count("name")) {
-        j.at("name").get_to(tn.name);
-    }
-    else {
-        tn.name = "";
-    }
+    maybe_to(j, "name", tn.name);
 }
 
 std::vector<double> drifires::Binning::edges(bool last)

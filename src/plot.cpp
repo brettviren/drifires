@@ -11,7 +11,8 @@ using namespace drifires;
 
 struct PlotDrifts : public Action {
 
-    Binning trange, drange;
+    Binning trange;
+    std::vector<double> impacts;
     double ystart;
     object cfg;
 
@@ -19,7 +20,7 @@ struct PlotDrifts : public Action {
         cfg = obj;
         cfg["ystart"].get_to(ystart);
         trange = cfg["trange"].get<Binning>();
-        drange = cfg["drange"].get<Binning>();
+        impacts = cfg["impacts"].get<std::vector<double>>();
     }
 
     virtual object act(Component& cmp, Drifter& dft) {
@@ -37,7 +38,6 @@ struct PlotDrifts : public Action {
                           bb[0].second/gfunits::length,
                           bb[1].second/gfunits::length);
 
-        auto impacts = drange.edges();
         for (const auto& imp : impacts) {
             std::cerr << "drift: x="<<imp/units::mm << " mm" << std::endl;
             dft.drift_electron(imp, ystart, 0, 0);

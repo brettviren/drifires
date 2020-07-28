@@ -4,21 +4,27 @@
 
 #include <iostream>
 
+using drifires::maybe_to;
+
 struct RkfCfg {
     drifires::TypeName tn;
-    double accuracy;
-    double maxstep;
+    double accuracy{0.000001*units::cm};
+    double maxstep{1*units::mm};
+    bool throw_ok{true};
 };
+
 
 void from_json(const drifires::object& j, RkfCfg& c)
 {
     from_json(j, c.tn);
-    j.at("accuracy").get_to(c.accuracy);
-    j.at("maxstep").get_to(c.maxstep);
+    maybe_to(j, "accuracy", c.accuracy);
+    maybe_to(j, "maxstep", c.maxstep);
+    maybe_to(j, "throw_ok", c.throw_ok);
 }
 
 struct driftlinerkf : public drifires::Drifter {
     Garfield::DriftLineRKF rkf;
+    bool throw_ok{true};
 
     virtual void set_sensor(Garfield::Sensor &sensor) {
         rkf.SetSensor(&sensor);
@@ -32,7 +38,8 @@ struct driftlinerkf : public drifires::Drifter {
                                     y/gfunits::length,
                                     z/gfunits::length,
                                     t/gfunits::time);
-        if (!ok) {
+        if (ok) { return; }
+        if (throw_ok) {
             throw std::runtime_error("failed to drift");
         }
     }
@@ -44,6 +51,7 @@ struct driftlinerkf : public drifires::Drifter {
         rkf.SetIntegrationAccuracy(cfg.accuracy/gfunits::length);
         rkf.SetMaximumStepSize(cfg.maxstep/gfunits::length);
         rkf.RejectKinks(true);
+        throw_ok = cfg.throw_ok;
     }
 };
 
