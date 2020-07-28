@@ -18,6 +18,7 @@ use with Wire-Cell Toolkit.
 - ROOT
 - Garfield++
 - Jsonnet compiler (to regenerate configs)
+- Wire-Cell Toolkit Python for some optional utilities
 
 ** Build
 

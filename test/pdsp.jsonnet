@@ -1,3 +1,7 @@
+// Configure drifires-cli to generate PDSP / DUNE APA responses.
+// The result should correspond to dune-garfield-1d565.json.bz2
+
+
 // A subset of WCT units.  These are NOT the same as Garfield (in
 // general).  ALL numbers accessible to users must be expressed in WCT
 // system of units.  drifiers will convert between WCT and Garfield
@@ -11,37 +15,74 @@ local units = {
     MeV: 1.0,
     megavolt: self.MeV/self.eplus,
     volt: 1e-6*self.megavolt, 
+    K: 1.0,
 };
+
+local temperature = 89*units.K;
 
 local integration_accuracy = 0.000001*units.cm;
 // 1mm is fast and probably okay.  0.1mm is also doable
 local maxstep = 1*units.mm;
 // How to sample response. 100us in 0.1us bins is usual
 local trange = { lo:0.0, hi: 100.0*units.us, nbins: 1000 };
-local response_plane = 10.0*units.cm;    // where the 'cathode' is
+
+// Distance between anode wire planes
+local plane_gap=4.76*units.mm;
+
+// locate the 'cathode' and start of drift paths.  WCT convention
+// measures it w.r.t. collection plane.
+local response_plane = 10.0*units.cm + plane_gap;
+
 local drift_field = 500.0*units.volt/units.cm;      // V/cm, nominal drift field
-local plane_gap=0.5*units.cm;   // between wire planes
+
+local drift_speed = 1.6*units.mm/units.us;
+local sample_period = 0.1*units.us;
+
+// Number of wires beyond the central wire-of-interest to calculate the fields.
 local max_wire = 10;
 local nwires = 2*max_wire + 1;
-local wire_pitch = 0.5*units.cm;         // between wires
-local nudge = 0.01*wire_pitch;       // nudge away from saddles
 
+// distance between neighboring wires in a plane
+// larsoft U/V: 4.762mm, W: 4.792mm
+// DUNE TDR: U/V: 4.669mm, W: 4.790mm
+// original GARFIELD 4.71
+local wire_pitch = 4.71*units.mm;
+
+// Diameter of wires
+local wire_diameter = 0.150*units.mm;
+
+// Distance to offset the first and last impact position so as to not
+// sample unlikely and anomolous paths which occur exactly along a
+// line of symmetry.
+local nudge = 0.5*wire_diameter;
+
+// Make a wire plane specification
 local wspec(name,loc,pot, readout=true) = {
     name:name,
     loc:loc,
     pot:pot,
     nwires: nwires,             // in a plane
     pitch: wire_pitch,
-    dia: 0.015,                 // cm
+    dia: wire_diameter,
     readout: readout,
 };    
 
+// Make a simple, infinite plane specification
 local pspec(name, loc, pot, readout=false) = {
     name:name,
     loc:loc,
     pot:pot,
-    nwires: 0,
+    nwires: 0,                  // marks as simple plane, not wire plane
     readout: readout
+};
+
+local plane_locations = {
+    c: pspec("c", response_plane, -drift_field*response_plane),
+    g: wspec("g", 3*plane_gap, -665.0*units.volt, false),
+    u: wspec("u", 2*plane_gap, -370.0*units.volt),
+    v: wspec("v", 1*plane_gap,    0.0*units.volt),
+    w: wspec("w", 0*plane_gap,  820.0*units.volt),
+    m: pspec("m",-1*plane_gap,    0.0*units.volt),
 };
 
 
@@ -54,18 +95,10 @@ local pspec(name, loc, pot, readout=false) = {
         // 2D cathode + wire anode planes and maybe "grid" and "mesh" planes
 
         // Medium is intrinsic to the component
-        medium : { type: "MediumLar" },
+        medium : { type: "MediumLar", temperature: temperature},
 
         periodicity: nwires*wire_pitch,
-        layers: [
-            pspec("c", response_plane, -drift_field*response_plane),
-            wspec("g", 2*plane_gap, -665.0*units.volt, false),
-            wspec("u", 1*plane_gap, -370.0*units.volt),
-            wspec("v", 0*plane_gap,    0.0*units.volt),
-            wspec("w",-1*plane_gap,  820.0*units.volt),
-            pspec("m",-2*plane_gap,    0.0*units.volt),
-        ],
-
+        layers: [ plane_locations[l] for l in ["c","g","u","v","w","m"]],
     },
     
     // Specify drift information
@@ -110,7 +143,7 @@ local pspec(name, loc, pot, readout=false) = {
                 name:name,
                 PlaneResponse: {
                     planeid:id,
-                    location: (1-id)*plane_gap,
+                    location: plane_locations[name].loc,
                     pitch: wire_pitch}},
 
             // skeleton of WCT field response.  
@@ -119,8 +152,8 @@ local pspec(name, loc, pot, readout=false) = {
                 axis: [1,0,0],
                 origin: response_plane,
                 tstart: 0,
-                period: 0.1*units.us,
-                speed: 1.6*units.mm/units.us,
+                period: sample_period,
+                speed: drift_speed,
             },
                     
 

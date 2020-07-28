@@ -15,7 +15,7 @@ struct AWLayer {
     double pitch{0.0};          // cm, dist between wires
     double dia{0.0};            // cm, wire diameter
 };
-void from_json(const drifires::object j, AWLayer& l) {
+void from_json(const drifires::object& j, AWLayer& l) {
     j.at("name").get_to(l.name);
     j.at("loc").get_to(l.loc);
     j.at("pot").get_to(l.pot);
