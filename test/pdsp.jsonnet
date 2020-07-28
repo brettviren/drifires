@@ -30,12 +30,19 @@ local trange = { lo:0.0, hi: 100.0*units.us, nbins: 1000 };
 local plane_gap=4.76*units.mm;
 
 // locate the 'cathode' and start of drift paths.  WCT convention
-// measures it w.r.t. collection plane.
+// measures it w.r.t. collection plane.  But, there appears to be a
+// time offset equal to one plane gap in past .json.bz2 files derived
+// from GARFIELD so we add it.
 local response_plane = 10.0*units.cm + plane_gap;
 
-local drift_field = 500.0*units.volt/units.cm;      // V/cm, nominal drift field
+// The nominal drift field.  
+local drift_field = 500.0*units.volt/units.cm;
 
+// Drift speed is merely copied into the output.  Detailed drift
+// velocity is copied inside the MediumLar drifires/Garfield++ class.
 local drift_speed = 1.6*units.mm/units.us;
+
+// The sampling for the produced responses.
 local sample_period = 0.1*units.us;
 
 // Number of wires beyond the central wire-of-interest to calculate the fields.
