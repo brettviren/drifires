@@ -5,3 +5,5 @@ build
 .envrc
 larwires.pdf
 feh_*
+auto
+latexmk-out

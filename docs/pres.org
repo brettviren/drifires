@@ -1,0 +1,232 @@
+#+title: ~drifires~
+#+subtitle: Garfield++ LAr Drift / Field Response Package
+#+author: Brett Viren
+#+latex_header: \usepackage{xspace}
+#+latex_header: \usepackage{libertine}
+#+latex_header: \usepackage{fontawesome}
+#+latex_header: \usetheme{Boadilla}
+#+latex_header: \setbeamertemplate{navigation symbols}{}
+#+latex_header: \hypersetup{colorlinks}
+#+latex_header: \setbeamerfont{alerted text}{series=\bfseries}
+#+options: ':t
+
+* Goals and Motivations for a new Field Calculator
+
+** Field calculations are bedrock for entire LArTPC industry.
+   - We *must* (but don't) have easy-to-use field calculators.
+
+** GARFIELD 
+   - Venerable, well respected and trusted results.
+   - Was hard and now essentially impossible to build.
+   - Requires high and rare expertise to run (thanks Yichen!).
+   - PCB anode hit geometry limitations (the trigger for this work).
+
+** Garfield++
+   - Recommended by GARFIELD maintainer, many developers/users.
+   - High quality code/build, toolkit approach with a variety of tools.
+   - Great documentation and many examples.
+   - Includes same calculation method as GARFIELD.
+
+* Garfield++ Overview (focus: 2D Analytic Component)
+
+[[file:lw.pdf]]
+
+- Provide a "medium" object (ie, describes LAr, see next)
+- Define 2D geometry as wires and planes with E-potentials.  
+- A subset are "readout electrodes" (weighting fields)
+- Create a drift (or multiple), save resulting signals.
+- Optional ROOT/TCanvas visualization.
+
+* Garfield++ LAr Medium
+
+A LAr medium class must be (and has been) provided.
+
+- Provide quantities: T, A, Z, \rho, $\vec{v}_{drift}(\vec{E})$
+- Maybe others that matter and need to be discovered.
+
+$\vec{v}_{drift}$ calculated as per:
+
+#+begin_center
+ https://lar.bnl.gov/properties/trans.html
+#+end_center
+
+* Garfield++ package at code level
+
+- C++ class library with some inheritance structure.
+- Many examples as "hard-coded", stand-alone ~main()~ programs.
+- ROOT dictionaries so use in ROOT or PyROOT scripts possible.
+- No general-purpose CLI.
+- ~libGarfield~ easily used from other applications/toolkits.
+  - approach taken in ~drifires~
+
+* ~drifires~ package
+
+Do (almost) minimum to provide configurable Garfield++ to LAr.
+
+- A C++ library providing ~MediumLar~ class and some abstractions for
+  Garfield++ classes
+- A high-level interface based on these abstractions:
+  - ~component~ builds geometry
+  - ~drifter~ makes drifts
+  - ~action~ puts them together to make a result
+- Configuration-driven using ~nlohmann::json~ objects
+  - Abstractions provide common ~configure(obj)~ method
+- CLI inputs and outputs JSON
+  - other files can be produced as side-effect
+
+#+begin_center
+https://github.com/brettviren/drifires
+#+end_center
+
+* ~drifires~ batteries
+
+** Component
+- ~AnalyticWire2D~ builds GARFIELD-like geometry 
+- future plans: PCB anode style "micro-wire" and neBEM
+** Drifter 
+- ~DriftLineRKF~ runs Runge-Kutta drifter
+- future plans: "avalanche" for super-fine tracking.
+** Actions
+- ~PlotDrifts~, uses Garfield++ ROOT/TCanvas support to produce plots of arbitrary drift paths through the E-field.  
+  - TBD: E-field and W-field plots.
+
+- ~HalfRegionResponse~, $N$ impacts covering half a wire region. 
+  - Directly produces WCT-compatible JSON.
+  - TBD: directly product WCT objects (if we embed to WCT)
+* 
+
+ include "wire2d" suitable for PDSP/uBooNE/ICARUS
+- Drifters include interface to Garfield++ Runge-Kutta stepper.
+- Actions include "plot paths" and "make responses"
+- Responses saved directly to WCT compatible ~.json.bz2~ file.
+
+* ~drifires-cli~ and ~pdsp.jsonnet~
+
+Initial focus is only on ProtoDUNE-sp configuration and validation.
+
+All required configuration in single ~pdsp.jsonnet~ file!
+
+** Make WCT response file
+
+\footnotesize
+#+begin_example
+  $ jsonnet pdsp.jsonnet | drifires-cli > pdsp-response.json
+  $ wirecell-sigproc plot-response \
+    --region=0 --trange 0,100 pdsp-response.json
+#+end_example
+
+** Make drift plots
+
+\footnotesize
+#+begin_example
+  $ jsonnet -A action=plot_drifts pdsp.jsonnet | drifires-cli
+  $ xdg-open pdsp-drifts.pdf
+#+end_example
+
+* Validation
+
+Goal is to precisely reproduce or understand deviations from the most
+recent WCT response file from GARFIELD for Protodune-SP.
+
+#+begin_center
+  ~dune-garfield-1d565.json.bz2~
+#+end_center
+
+Main tool for comparison plots from:
+
+#+begin_center
+  ~wirecell-sigproc plot-response~
+#+end_center
+
+* Main PDSP parameters
+
+|   | Y (mm)     | V (volt) |
+| c | 100 + 4.76 | Y*500/cm |
+| g | +3*gap     |     -665 |
+| u | +2*gap     |     -370 |
+| v | +1*gap     |        0 |
+| w | +0*gap     |      820 |
+| m | -1*gap     |        0 |
+
+- wires :: dia: 150\mu{}m, pitch: 4.71mm, gap: 4.76mm.
+- LAr :: T: 89K, Z: 18, A: 39.95, \rho: 1.3954 g/cc.
+
+* GARFIELD 
+
+#+ATTR_LATEX: :height 7.5cm :center
+[[file:pdsp-orig.png]]
+#+ATTR_LATEX: :height 7.5cm :center
+[[file:pdsp-orig-zoom.png]]
+
+* Garfield++ / ~drifires~
+
+#+ATTR_LATEX: :height 7.5cm :center
+[[file:smallstep/pdsp-response.png]]
+#+ATTR_LATEX: :height 7.5cm :center
+[[file:smallstep/pdsp-response-zoom.png]]
+
+* Validation status
+
+** Many gross differences already fixed
+
+- General and detailed shape well matched.
+- Drift origin, wire pitch, plane gap, voltages.
+- Bulk drift field (?).
+- Saddle point handling (more on this)
+
+** Remaining mysteries
+
+Compared to the GARFIELD calc, this Garfield++ calc:
+
+- has slightly stronger responses
+- is slightly "slower" / more stretched
+
+* Saddle point handling
+
+
+** Coarse                                                     :BMCOL:
+   :PROPERTIES:
+   :BEAMER_col: 0.5
+   :END:
+
+#+begin_center
+\scriptsize
+
+Coarse: ~maxstep=1.0mm, nudge=0.5*wire_radius~
+
+Any smaller ~nudge~ hits wire.
+#+end_center
+
+#+ATTR_LATEX: :center :page 1
+[[file:pdsp-drifts.pdf]]
+
+** Fine                                                       :BMCOL:
+   :PROPERTIES:
+   :BEAMER_col: 0.5
+   :END:
+
+#+begin_center
+\scriptsize
+
+Fine: ~maxstep=0.1mm, nudge=0.01*wire_radius~
+
+Requires $\approx 6\times$ more CPU time.
+#+end_center
+#+ATTR_LATEX: :center :page 1
+[[file:smallstep/pdsp-drifts.pdf]]
+
+** 
+\scriptsize
+
+What is most correct?
+Closer to saddle point samples increasingly smaller phase space and
+increasingly more extreme behavior (longer travel time).
+
+* Future work
+
+- Understand remaining validation differences for PDSP.
+- Select policy for saddle point handling.
+- Factor configuration and extend to ICARUS, uBooNE, etc.
+- Try to optimize calculation to be fast enough to run inside WCT.
+- Consider deprecate distribution of ~.json.bz2~ files in favor of
+  users running ~drifires-cli~?
