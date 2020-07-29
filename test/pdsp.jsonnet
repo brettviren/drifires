@@ -22,7 +22,7 @@ local temperature = 89*units.K;
 
 local integration_accuracy = 0.000001*units.cm;
 // 1mm is fast and probably okay.  0.1mm is also doable
-local maxstep = 1*units.mm;
+local maxstep = 0.1*units.mm;
 // How to sample response. 100us in 0.1us bins is usual
 local trange = { lo:0.0, hi: 100.0*units.us, nbins: 1000 };
 
@@ -35,12 +35,13 @@ local plane_gap=4.76*units.mm;
 // from GARFIELD so we add it.
 local response_plane = 10.0*units.cm + plane_gap;
 
-// The nominal drift field.  
-local drift_field = 500.0*units.volt/units.cm;
-
-// Drift speed is merely copied into the output.  Detailed drift
+// This drift speed is merely copied into the output.  Detailed drift
 // velocity is copied inside the MediumLar drifires/Garfield++ class.
-local drift_speed = 1.6*units.mm/units.us;
+// Wenqiang found PDSP is somewhat less than nominal 1.6mm/us.
+local drift_speed = 1.565*units.mm/units.us;
+
+// Set the nominal drift field.
+local drift_field = 500.0*units.volt/units.cm;
 
 // The sampling for the produced responses.
 local sample_period = 0.1*units.us;
@@ -61,7 +62,7 @@ local wire_diameter = 0.150*units.mm;
 // Distance to offset the first and last impact position so as to not
 // sample unlikely and anomolous paths which occur exactly along a
 // line of symmetry.
-local nudge = 0.5*wire_diameter;
+local nudge = 0.01*wire_diameter;
 
 // Make a wire plane specification
 local wspec(name,loc,pot, readout=true) = {
