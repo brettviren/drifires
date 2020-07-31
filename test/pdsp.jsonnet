@@ -30,19 +30,23 @@ local trange = { lo:0.0, hi: 100.0*units.us, nbins: 1000 };
 // Distance between anode wire planes
 local plane_gap=4.76*units.mm;
 
-// locate the 'cathode' and start of drift paths.  WCT convention
-// measures it w.r.t. collection plane.  But, there appears to be a
-// time offset equal to one plane gap in past .json.bz2 files derived
-// from GARFIELD so we add it.
-local response_plane = 10.0*units.cm + plane_gap;
-
-// This drift speed is merely copied into the output.  Detailed drift
-// velocity is copied inside the MediumLar drifires/Garfield++ class.
-// Wenqiang found PDSP is somewhat less than nominal 1.6mm/us.
-local drift_speed = 1.565*units.mm/units.us;
+// A virtual 'cathode' plane where the responses start and which holds
+// the potential setting the drift field.  Adding plane_gap closely
+// corresponds to the time shift Wenqiang added to the
+// dune-garfield-1d565.json.bz2 fields.  This is a time shifted
+// version of garfield-1d-boundary-path-rev-dune.json.bz2.  Removing
+// the plane_gap will be w/in ~1us of this unshifted result.  There is
+// still a ~5% time scale difference.
+local response_plane = 10.0*units.cm+plane_gap;
 
 // Set the nominal drift field.
 local drift_field = 500.0*units.volt/units.cm;
+
+// The "bulk" drift speed is NOT used by drifires and is merely copied
+// to the output WCT .json.bz2 file.  Detailed drift velocity is
+// copied inside the MediumLar drifires/Garfield++ class.  Wenqiang
+// found PDSP is somewhat less than nominal 1.6mm/us.
+local bulk_drift_speed = 1.565*units.mm/units.us;
 
 // The sampling for the produced responses.
 local sample_period = 0.1*units.us;
@@ -175,7 +179,7 @@ function(action = "response")
                 origin: response_plane,
                 tstart: 0,
                 period: sample_period,
-                speed: drift_speed,
+                speed: bulk_drift_speed,
             },
                     
 
