@@ -37,19 +37,46 @@ Adjust paths to match your environment.
 * Running
 
 ~drifiers-cli~ provides a command line interface to the functionality
-which is fully driven by configuration.  Example configuration is
-provided.  Eg:
+which is fully driven by configuration.  Configuration is ultimately
+in the form of JSON text and Jsonnet is preferred to construct that
+JSON (though users are free to use other means).
+
+Example configuration is provided for some detectors and different
+geometries and "actions" under [[cfg/]].  And, top-level main structures
+can be used with simple command line arguments.
+
+For example to plot the drift paths for the ProtoDUNE-SP configuration:
 
 #+begin_example
-  $ jsonnet test/pdsp.jsonnet | drifires-cli > pdsp-response.json
+  $ jsonnet -J cfg -A action="drifts" -A filename="pdsp-drifts.pdf" \
+    cfg/pdsp.jsonnet | drifires-cli
+  $ mupdf pdsp-drifts.pdf
+#+end_example
+
+Produces:
+
+[[file:docs/pdsp-drifts.png]]
+
+A similar command will produce responses in a file which may be used
+with the Wire-Cell Toolkit.
+
+#+begin_example
+  $ jsonnet -J cfg -A action="response" \
+    cfg/pdsp.jsonnet | drifires-cli > pdsp-response.json
   $ bzip2 pdsp-response.json
 #+end_example
 
 With Wire-Cell Toolkit Python available one may plot the result:
 
 #+begin_example
- $ wirecell-sigproc plot-response pdsp-response.json.bz2 pdsp-response.png
+ $ wirecell-sigproc plot-response --trange=50,70 \
+    pdsp-response.json.bz2 docs/pdsp-response-example.png
 #+end_example
+
+which produces:
+
+#+ATTR_ORG: :width 800
+[[file:docs/pdsp-response-example.png]]
 
 * Library
 

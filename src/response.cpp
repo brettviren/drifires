@@ -15,7 +15,7 @@ struct HalfRegionResponse : public Action {
     double nudge;
     double pitch;
     object FR;
-    std::string filename;
+    //std::string filename;
 
     virtual void configure(object cfg) {
         std::cerr << "response: configure" << std::endl;
@@ -26,7 +26,7 @@ struct HalfRegionResponse : public Action {
 
         cfg["trange"].get_to(trange);
         cfg["irange"].get_to(irange);
-        cfg["filename"].get_to(filename);
+        // cfg["filename"].get_to(filename);
 
         // FR schema requires each type to be held with a key of the type name.
         FR["FieldResponse"] = cfg["FieldResponse"];
@@ -106,7 +106,7 @@ struct HalfRegionResponse : public Action {
 
             sens.ClearSignal();
         }
-        //std::ofstream out(filename);
+        // std::ofstream out(filename);
         // if (!out) {
         //     throw std::runtime_error("fail to open " + filename);
         // }

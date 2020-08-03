@@ -39,7 +39,9 @@
 
 * Garfield++ LAr Medium
 
-A LAr medium class must be (and has been) provided.
+Garfield++ is meant for gas.
+
+A LAr "medium" class must be (and has been) provided.
 
 - Provide quantities: T, A, Z, \rho, $\vec{v}_{drift}(\vec{E})$
 - Maybe others that matter and need to be discovered.
@@ -54,14 +56,14 @@ $\vec{v}_{drift}$ calculated as per:
 
 - C++ class library with some inheritance structure.
 - Many examples as "hard-coded", stand-alone ~main()~ programs.
-- ROOT dictionaries so use in ROOT or PyROOT scripts possible.
-- No general-purpose CLI.
+- ROOT dictionaries provided, C++/Python scripts possible.
+- No general-purpose CLI provided.
 - ~libGarfield~ easily used from other applications/toolkits.
   - approach taken in ~drifires~
 
 * ~drifires~ package
 
-Do (almost) minimum to provide configurable Garfield++ to LAr.
+Thin layer on Garfield++ for configurable support of LAr detectors.
 
 - A C++ library providing ~MediumLar~ class and some abstractions for
   Garfield++ classes
@@ -81,36 +83,30 @@ https://github.com/brettviren/drifires
 * ~drifires~ batteries
 
 ** Component
-- ~AnalyticWire2D~ builds GARFIELD-like geometry 
-- future plans: PCB anode style "micro-wire" and neBEM
+- Builds geometry, supplies field calc engine.
+- So far ~AnalyticWire2D~ GARFIELD-like
+- future plans: PCB anode using neBEM
 ** Drifter 
 - ~DriftLineRKF~ runs Runge-Kutta drifter
 - future plans: "avalanche" for super-fine tracking.
 ** Actions
-- ~PlotDrifts~, uses Garfield++ ROOT/TCanvas support to produce plots of arbitrary drift paths through the E-field.  
-  - TBD: E-field and W-field plots.
+- Diagnostic plots with Garfield++ ROOT/TCanvas support (electron
+  drift paths, E/W fields)
+- Field response functions, directly produced as WCT-compatible JSON.
 
-- ~HalfRegionResponse~, $N$ impacts covering half a wire region. 
-  - Directly produces WCT-compatible JSON.
-  - TBD: directly product WCT objects (if we embed to WCT)
-* 
-
- include "wire2d" suitable for PDSP/uBooNE/ICARUS
-- Drifters include interface to Garfield++ Runge-Kutta stepper.
-- Actions include "plot paths" and "make responses"
-- Responses saved directly to WCT compatible ~.json.bz2~ file.
-
-* ~drifires-cli~ and ~pdsp.jsonnet~
+* ~drifires-cli~ with PDSP
 
 Initial focus is only on ProtoDUNE-sp configuration and validation.
 
-All required configuration in single ~pdsp.jsonnet~ file!
+All required configuration in single ~pdsp.jsonnet~ file.
 
 ** Make WCT response file
 
 \footnotesize
 #+begin_example
-  $ jsonnet pdsp.jsonnet | drifires-cli > pdsp-response.json
+  $ jsonnet -J cfg \
+    -A action="response" \
+    cfg/pdsp.jsonnet | drifires-cli > pdsp-response.json
   $ wirecell-sigproc plot-response \
     --region=0 --trange 0,100 pdsp-response.json
 #+end_example
@@ -119,9 +115,15 @@ All required configuration in single ~pdsp.jsonnet~ file!
 
 \footnotesize
 #+begin_example
-  $ jsonnet -A action=plot_drifts pdsp.jsonnet | drifires-cli
+  $ jsonnet -J cfg \
+    -A action="drifts" -A filename="pdsp-drifts.pdf" \
+    cfg/pdsp.jsonnet | drifires-cli
   $ xdg-open pdsp-drifts.pdf
 #+end_example
+
+** 
+
+Will show example output
 
 * Validation
 
@@ -171,7 +173,6 @@ Main tool for comparison plots from:
 
 - General and detailed shape well matched.
 - Drift origin, wire pitch, plane gap, voltages.
-- Bulk drift field (?).
 - Saddle point handling (more on this)
 
 ** Remaining mysteries
@@ -224,9 +225,9 @@ increasingly more extreme behavior (longer travel time).
 
 * Future work
 
-- Understand remaining validation differences for PDSP.
+- Understand (or accept) remaining validation differences for PDSP.
 - Select policy for saddle point handling.
-- Factor configuration and extend to ICARUS, uBooNE, etc.
+- Factor configuration (done) and extend to ICARUS, uBooNE, etc.
 - Try to optimize calculation to be fast enough to run inside WCT.
-- Consider deprecate distribution of ~.json.bz2~ files in favor of
-  users running ~drifires-cli~?
+- Consider deprecate distribution of WCT ~.json.bz2~ files in favor of
+  having users run ~drifires-cli~?
