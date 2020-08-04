@@ -1,6 +1,6 @@
 // Configure drifires-cli to generate 2D wire responses.
 //
-// run like jsonnet -A action=response -A det=pdsp.jsonnet
+// run like jsonnet -A det=pdsp.jsonnet
 
 // The result should correspond to dune-garfield-1d565.json.bz2
 

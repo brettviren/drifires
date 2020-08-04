@@ -37,8 +37,6 @@ struct HalfRegionResponse : public Action {
         sens.SetArea();
         sens.SetTimeWindow(trange.lo/gfunits::time, trange.binsize()/gfunits::time, trange.nbins);
         
-        auto labels = cmp.readout_labels();
-
         std::vector<int> iwires;
         for (int iwire=-neighbors; iwire<0; ++iwire) {
             iwires.push_back(iwire);

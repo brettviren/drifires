@@ -30,11 +30,6 @@ namespace drifires {
             throw std::runtime_error("enable_view not implemented");
         }
 
-        virtual BoundingBox bounds() = 0;
-
-        // Return all the readout labels
-        virtual std::vector<std::string> readout_labels() = 0;
-
     };
 
     // Get A configured component

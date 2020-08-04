@@ -47,17 +47,8 @@ void from_json(const drifires::object j, AWCfg& c) {
 struct AnalyticWire2D : public drifires::Component {
     Garfield::ComponentAnalyticField cmp;
     Garfield::Sensor sens;
-    drifires::BoundingBox bb;
-
-    std::vector<std::string> readouts;
-
-    virtual std::vector<std::string> readout_labels() {
-        return readouts;
-    }
 
     virtual Garfield::ComponentBase& component() { return cmp; }
-
-    virtual drifires::BoundingBox bounds() { return bb; }
 
     virtual void enable_view(Garfield::ViewCell& vc) {
         vc.SetComponent(&cmp);
@@ -102,7 +93,6 @@ struct AnalyticWire2D : public drifires::Component {
                     if (layer.readout) {
                         cmp.AddReadout(nam);
                         sens.AddElectrode(&cmp, nam);
-                        readouts.push_back(nam);
                     }
                 }
             }
@@ -111,19 +101,11 @@ struct AnalyticWire2D : public drifires::Component {
                 if (layer.readout) {
                     cmp.AddReadout(layer.name);
                     sens.AddElectrode(&cmp, layer.name);
-                    readouts.push_back(layer.name);
                 }
             }
         }
 
         cmp.SetPeriodicityX(cfg.periodicity/gfunits::length);
-        bb.resize(3);
-        bb[0].first  = -cfg.periodicity/2.0;
-        bb[0].second =  cfg.periodicity/2.0;
-        bb[1].first  = ymin;
-        bb[1].second = ymax;
-        bb[2].first  = -50;
-        bb[2].second = +50;
 
         sens.EnableComponent(0, true);
 
