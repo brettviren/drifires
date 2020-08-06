@@ -227,7 +227,10 @@ increasingly more extreme behavior (longer travel time).
 
 - Understand (or accept) remaining validation differences for PDSP.
 - Select policy for saddle point handling.
-- Factor configuration (done) and extend to ICARUS, uBooNE, etc.
+  - how close do we sample to the extreme?
+- Factor configuration and extend to ICARUS, uBooNE, etc.
+  - factoring done
 - Try to optimize calculation to be fast enough to run inside WCT.
+  - dynamically set max step size?
 - Consider deprecate distribution of WCT ~.json.bz2~ files in favor of
   having users run ~drifires-cli~?

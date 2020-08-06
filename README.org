@@ -2,10 +2,10 @@
 
 * Overview
 
-~drifiers~ calculates drift paths and field responses on electrodes as
+~drifires~ calculates drift paths and field responses on electrodes as
 induced current.  The heavy lifting is done by Garfield++.  ~libdrifers~
 provides support for LAr and parameterized models for geometries
-related to typical LArTPC detectors.  The ~drifiers~ command line
+related to typical LArTPC detectors.  The ~drifires~ command line
 interface produces diagnostic output and response data suitable for
 use with Wire-Cell Toolkit.
 
@@ -36,7 +36,7 @@ Adjust paths to match your environment.
 
 * Running
 
-~drifiers-cli~ provides a command line interface to the functionality
+~drifires-cli~ provides a command line interface to the functionality
 which is fully driven by configuration.  Configuration is ultimately
 in the form of JSON text and Jsonnet is preferred to construct that
 JSON (though users are free to use other means).
