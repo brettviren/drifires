@@ -32,14 +32,17 @@ struct PlotDrifts : public Action {
         
         Garfield::ViewDrift driftView;
         dft.enable_plotting(driftView);
-        auto bb = cmp.bounds();
-        driftView.SetArea(bb[0].first/gfunits::length,
-                          bb[1].first/gfunits::length,
-                          bb[0].second/gfunits::length,
-                          bb[1].second/gfunits::length);
+        // auto bb = cmp.bounds();
+        // driftView.SetArea(bb[0].first/gfunits::length,
+        //                   bb[1].first/gfunits::length,
+        //                   bb[0].second/gfunits::length,
+        //                   bb[1].second/gfunits::length);
+        driftView.SetArea();
 
         for (const auto& imp : impacts) {
-            std::cerr << "drift: x="<<imp/units::mm << " mm" << std::endl;
+            std::cerr << "drift: x="<<imp/units::mm << " mm"
+                      << " y="<<ystart/units::mm
+                      << std::endl;
             dft.drift_electron(imp, ystart, 0, 0);
         }
 

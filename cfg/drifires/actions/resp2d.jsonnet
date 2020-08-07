@@ -6,7 +6,7 @@ function(det) {
     neighbors: det.max_wire,
     
     // where to start the paths, in cm
-    ystart: det.response_plane,
+    ystart: det.drift_start,
 
     local pln(name,id) = {
         name:name,

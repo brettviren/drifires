@@ -6,12 +6,15 @@
 
 #include <iostream>
 
+using drifires::maybe_to;
+
 struct AWLayer {
     std::string name;
     double loc;                 // cm, location in y
     double pot;                 // V, potential
     bool readout{false};        
     int nwires{0};              // 0 if plane, else below also set
+    int nextra{0};              // extra wires on either side of central nwires
     double pitch{0.0};          // cm, dist between wires
     double dia{0.0};            // cm, wire diameter
 };
@@ -21,6 +24,7 @@ void from_json(const drifires::object& j, AWLayer& l) {
     j.at("pot").get_to(l.pot);
     if (j.count("nwires") and j.at("nwires").get<int>() > 0) {
         j.at("nwires").get_to(l.nwires);
+        j.at("nextra").get_to(l.nextra);
         j.at("pitch").get_to(l.pitch);
         j.at("dia").get_to(l.dia);
     }
@@ -34,12 +38,12 @@ void from_json(const drifires::object& j, AWLayer& l) {
 
 struct AWCfg {
     drifires::TypeName tn;
-    double periodicity;
+    double periodicity{-1};
     std::vector<AWLayer> layers;
 };
 void from_json(const drifires::object j, AWCfg& c) {
     from_json(j, c.tn);
-    j.at("periodicity").get_to(c.periodicity);
+    maybe_to(j, "periodicity", c.periodicity);
     c.layers = j.at("layers").get<std::vector<AWLayer>>();
 }
 
@@ -47,7 +51,6 @@ void from_json(const drifires::object j, AWCfg& c) {
 struct AnalyticWire2D : public drifires::Component {
     Garfield::ComponentAnalyticField cmp;
     Garfield::Sensor sens;
-    drifires::BoundingBox bb;
 
     std::vector<std::string> readouts;
 
@@ -57,7 +60,8 @@ struct AnalyticWire2D : public drifires::Component {
 
     virtual Garfield::ComponentBase& component() { return cmp; }
 
-    virtual drifires::BoundingBox bounds() { return bb; }
+    //drifires::BoundingBox bb;
+    //virtual drifires::BoundingBox bounds() { return bb; }
 
     virtual void enable_view(Garfield::ViewCell& vc) {
         vc.SetComponent(&cmp);
@@ -85,21 +89,22 @@ struct AnalyticWire2D : public drifires::Component {
             }
 
             const int nwires = layer.nwires;
+            const int nextra = layer.nextra;
             if (nwires > 0) {
-                double w0 = -nwires/2 * layer.pitch;
-                for (int iwire=0; iwire < nwires; ++iwire) {
-                    double wx = w0 + iwire * layer.pitch;
-                    const int nrel = iwire - nwires/2;
+                const int ntotwires = 2*nextra + nwires;
+                const double w0 = -ntotwires/2 * layer.pitch;
+                for (int iwire=0; iwire < ntotwires; ++iwire) {
+                    const double wx = w0 + iwire * layer.pitch;
+                    const int nrel = iwire - ntotwires/2;
                     auto nam = drifires::wire_name(layer.name, nrel);
                     std::cerr << "add wire: " << nam
                               << " nrel:"<<nrel<<" iwire:"<<iwire
-                              << " wx:"<<wx
-                              << " w0:"<<w0 <<std::endl;
+                              << " wx:"<<wx << " w0:"<<w0 <<std::endl;
                     cmp.AddWire(wx/gfunits::length,        // x
                                 layer.loc/gfunits::length, // y
                                 layer.dia/gfunits::length, // diameter
                                 layer.pot/gfunits::pot, nam); // potential
-                    if (layer.readout) {
+                    if (layer.readout and std::abs(nrel) <= nwires/2) {
                         cmp.AddReadout(nam);
                         sens.AddElectrode(&cmp, nam);
                         readouts.push_back(nam);
@@ -116,14 +121,16 @@ struct AnalyticWire2D : public drifires::Component {
             }
         }
 
-        cmp.SetPeriodicityX(cfg.periodicity/gfunits::length);
-        bb.resize(3);
-        bb[0].first  = -cfg.periodicity/2.0;
-        bb[0].second =  cfg.periodicity/2.0;
-        bb[1].first  = ymin;
-        bb[1].second = ymax;
-        bb[2].first  = -50;
-        bb[2].second = +50;
+        if (cfg.periodicity > 0.0) {
+            cmp.SetPeriodicityX(cfg.periodicity/gfunits::length);
+        }
+        // bb.resize(3);
+        // bb[0].first  = -cfg.periodicity/2.0;
+        // bb[0].second =  cfg.periodicity/2.0;
+        // bb[1].first  = ymin;
+        // bb[1].second = ymax;
+        // bb[2].first  = -50;
+        // bb[2].second = +50;
 
         sens.EnableComponent(0, true);
 

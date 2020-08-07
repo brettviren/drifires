@@ -19,7 +19,9 @@ function(det)
         // Medium is intrinsic to the component
         medium : { type: "MediumLar", temperature: det.temperature},
 
-        periodicity: det.nwires*det.wire_pitch,
+        // if <= 0 then no periodic boundary conditions.
+        //periodicity: det.nwires*det.wire_pitch,
+        periodicity: -1,
 
         layers: util.values(det.plane_locations),
     },

@@ -19,7 +19,7 @@ namespace Garfield {
             EnableDrift();
             EnablePrimaryIonisation();
             // SetW(...);
-            // SetFanoFActor(...);
+            // SetFanoFActor(0.117);
         }            
         virtual ~MediumLar() { }
 

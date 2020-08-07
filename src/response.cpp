@@ -18,7 +18,6 @@ struct HalfRegionResponse : public Action {
     //std::string filename;
 
     virtual void configure(object cfg) {
-        std::cerr << "response: configure" << std::endl;
         cfg["neighbors"].get_to(neighbors);
         cfg["nudge"].get_to(nudge);
 
@@ -27,6 +26,9 @@ struct HalfRegionResponse : public Action {
         cfg["trange"].get_to(trange);
         cfg["irange"].get_to(irange);
         // cfg["filename"].get_to(filename);
+
+        std::cerr << "response: irange: " << irange.nbins
+                  << ":["<<irange.lo/units::mm<<","<<irange.hi/units::mm<<"]mm"<<std::endl;
 
         // FR schema requires each type to be held with a key of the type name.
         FR["FieldResponse"] = cfg["FieldResponse"];
@@ -70,6 +72,7 @@ struct HalfRegionResponse : public Action {
             for (auto& plane : FR["FieldResponse"]["planes"]) {
                 auto pname = plane["name"].get<std::string>();
                 auto& plane_response = plane["PlaneResponse"];
+                auto& paths = plane_response["paths"];
                 const double pitch = plane_response["pitch"];
                 
                 std::cerr << "\tplane: " << pname
@@ -91,17 +94,27 @@ struct HalfRegionResponse : public Action {
                     object current{{"array",array}};
                     const double pitchpos = pitch*iwire + impact;
 
-                    std::cerr << "\t\t" << ind << ": pp=" << pitchpos
-                              << " iwire="<<iwire
-                              << " '" << wname << "'"
-                              << " imp="<<impact << std::endl;
 
                     object path_response{{"current",current},
                                          {"pitchpos", pitchpos},
                                          {"wirepos",0}};
                     object PR{{"PathResponse",path_response}};
-                    plane_response["paths"].push_back(PR);
+
+                    std::cerr << "\t\t" << ind
+                              << ": pp=" << pitchpos 
+                              << " iwire="<<iwire
+                              << " '" << wname << "'"
+                              << " imp="<<impact << std::endl;
+
+                    paths.push_back(PR);
                 }
+                // order by pitchpos as some WCT code has this assumption built in.
+                // check with jq argument:
+                // '[.FieldResponse.planes[].PlaneResponse.paths[].PathResponse.pitchpos]'
+                using jitr_type = decltype(*paths.begin());
+                std::sort(paths.begin(), paths.end(), [](const jitr_type p1, const jitr_type p2) {
+                    return p1["PathResponse"]["pitchpos"] < p2["PathResponse"]["pitchpos"];
+                });
             }
 
             sens.ClearSignal();
