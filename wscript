@@ -2,6 +2,8 @@
 
 import os.path as osp
 
+import subprocess
+
 VERSION='0.0.0'
 APPNAME='drifires'
 
@@ -17,6 +19,8 @@ def options(opt):
                    help='Point to ROOT install area')
     opt.add_option('--with-garfieldpp', default=None,
                    help='Point to Garfield++ install area')
+    opt.add_option('--with-moo-exec', default='moo',
+                   help='Set moo program')
 
 def have_lib(cfg, name, header, libs):
     NAME = name.upper()
@@ -53,7 +57,13 @@ def configure(cfg):
     have_lib(cfg, 'root', 'Rtypes.h', [
         'Core', 'Graf', 'Hist', 'Graf3d', 'Gpad', 'Geom', 'Matrix', 'MathCore'])
 
+    cfg.find_program(cfg.options.with_moo_exec,
+                     var='MOO', define_name='HAVE_MOO', mandatory=False)
 
+    cfg.env.DO_CODEGEN = False
+    if cfg.env.MOO:
+        cfg.env.DO_CODEGEN = True
+        
 
 def build(bld):
     uses='NLJS GARFIELDPP ROOT'.split()
@@ -64,6 +74,8 @@ def build(bld):
     rpath = list(set(rpath))    
 
     sources = bld.path.ant_glob('src/*.cpp')
+
+
     bld.shlib(features='cxx', includes='inc', 
               source = sources, target='drifires',
               uselib_store='DRIFIRES', use=uses)
@@ -88,3 +100,18 @@ def build(bld):
                 target = 'drifires-test',
                 rpath = rpath,
                 use = ['drifires'] + uses)
+
+    if bld.env.DO_CODEGEN:
+        print("codegen")
+        srcdir = bld.path.find_dir("src")
+        for codegen in bld.path.ant_glob("src/*-codegen.jsonnet"):
+            imports = bld.env.MOO[0] + " imports " + codegen.abspath()
+            imports = subprocess.check_output(imports, shell=True)
+            imports = imports.decode().split("\n")
+            imports = [bld.root.find_node(im) for im in imports]
+            name = codegen.name.replace("-codegen.jsonnet","")
+            for tmpl in ["nljs", "structs"]:
+                tgt = srcdir.make_node("%s_%s.hpp" % (name, tmpl))
+                bld(rule="${MOO} render -o ${TGT} ${SRC[0].abspath()} avro_%s.hpp.j2" % tmpl,
+                    source=[codegen]+imports, target=[tgt])
+    

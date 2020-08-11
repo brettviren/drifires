@@ -3,10 +3,12 @@ local units = import "drifires/units.jsonnet";
 {
     temperature : 89*units.K,
 
-    integration_accuracy : 0.000001*units.cm,
+    //integration_accuracy : 0.000001*units.cm,
+    integration_accuracy : 1.0e-9*units.cm,
 
-    // 1mm is too fast to allow nudges smaller than 1 radius
-    //local maxstep = 0.1*units.mm;
+    // 1mm is too fast to allow nudges smaller than 1 radius unless
+    // also integration_accuracy is like 1e-9cm.
+    // maxstep: 0.1*units.mm,
     maxstep : 1*units.mm,
 
     // How to sample response. 100us in 0.1us bins is usual
@@ -17,7 +19,8 @@ local units = import "drifires/units.jsonnet";
     plane_gap:4.71*units.mm,
 
     // Where in Y the drifts start
-    drift_start: 10.0*units.cm + self.plane_gap,
+    //drift_start: 10.0*units.cm + self.plane_gap,
+    drift_start: 10.0*units.cm,
 
     // Where in Z the mesh plane is
     mesh_plane_y: -4.79*units.mm,
@@ -63,8 +66,9 @@ local units = import "drifires/units.jsonnet";
     // sample unlikely and anomolous paths which occur exactly along a
     // line of symmetry.  A nudge of 0.01*wire_diameter is needed to
     // reproduce the delayed "prong" of the central response function.
-    //local nudge = 0.01*wire_diameter;
-    nudge : 0.5 * self.wire_diameter,
+    // nudge: 0.01 * self.wire_diameter,
+    //nudge : 0.5 * self.wire_diameter,
+    nudge: 0.0001*units.cm,     // what GARFIELD uses
 
     // Make a 2D wire plane specification
     wspec(pname, pit, loc, pot, nextra=self.nextra_wires, readout=true) :: {

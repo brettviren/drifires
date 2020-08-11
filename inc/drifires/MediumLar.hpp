@@ -20,6 +20,10 @@ namespace Garfield {
             EnablePrimaryIonisation();
             // SetW(...);
             // SetFanoFActor(0.117);
+            SetExtrapolationMethodVelocity("linear", "linear");
+            SetPressure(1.0*760.0);
+            // V/cm, V/cm, npoints, logarithmic
+            SetFieldGrid(100., 1000., 100, true);
         }            
         virtual ~MediumLar() { }
 
@@ -68,6 +72,8 @@ namespace Garfield {
             // std::cerr << "v=" << vmmus << " mm/us, E=" << evpcm << " V/cm\n";
             return true;
         }            
+
+        // Set these parameters as fun(E,B) to zero for now.
         bool ElectronTownsend(const double, const double, const double,
                               const double, const double, const double,
                               double& alpha) { alpha=0.0; return true; }
@@ -76,6 +82,9 @@ namespace Garfield {
                                 const double, const double, const double,
                                 double& eta) { eta=0.0; return true; }
 
+        bool ElectronDiffusion(const double, const double, const double,
+                               const double, const double, const double,
+                               double& dl, double& dt) { dl=dt=0.0; return true; }
     };
 
 } // namespace Garfield

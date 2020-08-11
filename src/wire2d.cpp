@@ -103,7 +103,9 @@ struct AnalyticWire2D : public drifires::Component {
                     cmp.AddWire(wx/gfunits::length,        // x
                                 layer.loc/gfunits::length, // y
                                 layer.dia/gfunits::length, // diameter
-                                layer.pot/gfunits::pot, nam); // potential
+                                layer.pot/gfunits::pot, // potential
+                                nam);
+
                     if (layer.readout and std::abs(nrel) <= nwires/2) {
                         cmp.AddReadout(nam);
                         sens.AddElectrode(&cmp, nam);
