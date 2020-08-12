@@ -269,6 +269,8 @@ namespace drifires {
     // Converters for PlotDriftsCfg
     // Configuration for PlotDrifts
     inline void to_json(json& j, const PlotDriftsCfg& obj) {
+        j["type"] = obj.type;
+        j["name"] = obj.name;
         j["ystart"] = obj.ystart;
         j["trange"] = obj.trange;
         j["impacts"] = obj.impacts;
@@ -276,6 +278,18 @@ namespace drifires {
         j["pdf"] = obj.pdf;
     }
     inline void from_json(const json& j, PlotDriftsCfg& obj) {
+        if (j.contains("type")) {
+            j.at("type").get_to(obj.type);
+        }
+        else {
+            obj.type = "PlotDrifts";
+        }
+        if (j.contains("name")) {
+            j.at("name").get_to(obj.name);
+        }
+        else {
+            obj.name = "";
+        }
         if (j.contains("ystart")) {
             j.at("ystart").get_to(obj.ystart);
         }
@@ -310,14 +324,42 @@ namespace drifires {
     // Converters for PlotDiagCfg
     // Configuration for PlotDiags
     inline void to_json(json& j, const PlotDiagCfg& obj) {
-        j["dummy"] = obj.dummy;
+        j["type"] = obj.type;
+        j["name"] = obj.name;
+        j["areas"] = obj.areas;
+        j["pdf"] = obj.pdf;
+        j["medium"] = obj.medium;
     }
     inline void from_json(const json& j, PlotDiagCfg& obj) {
-        if (j.contains("dummy")) {
-            j.at("dummy").get_to(obj.dummy);
+        if (j.contains("type")) {
+            j.at("type").get_to(obj.type);
         }
         else {
-            throw std::runtime_error("required field not provided: \"PlotDiagCfg::dummy\"");
+            obj.type = "PlotDiag";
+        }
+        if (j.contains("name")) {
+            j.at("name").get_to(obj.name);
+        }
+        else {
+            obj.name = "";
+        }
+        if (j.contains("areas")) {
+            j.at("areas").get_to(obj.areas);
+        }
+        else {
+            throw std::runtime_error("required field not provided: \"PlotDiagCfg::areas\"");
+        }
+        if (j.contains("pdf")) {
+            j.at("pdf").get_to(obj.pdf);
+        }
+        else {
+            obj.pdf = "drifires-drifts.pdf";
+        }
+        if (j.contains("medium")) {
+            j.at("medium").get_to(obj.medium);
+        }
+        else {
+            throw std::runtime_error("required field not provided: \"PlotDiagCfg::medium\"");
         }
     }
     // Converters for PlaneResponseStub

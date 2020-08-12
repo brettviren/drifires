@@ -69,6 +69,8 @@ namespace drifires {
 
 
     struct PlotDriftsCfg{
+        std::string type;
+        std::string name;
         double ystart;
         Binning trange;
         std::vector<double> impacts;
@@ -78,7 +80,11 @@ namespace drifires {
 
 
     struct PlotDiagCfg{
-        int dummy;
+        std::string type;
+        std::string name;
+        std::vector<Area2d> areas;
+        std::string pdf;
+        TypeName medium;
     };
 
 
