@@ -4,6 +4,7 @@ local schemas = [
     import "wire2d-schema.jsonnet",
     import "drifter-schema.jsonnet",
     import "medium-schema.jsonnet",
+    import "plots-schema.jsonnet",
 ];
 local cg = moo.schema.avro.codegen;
 

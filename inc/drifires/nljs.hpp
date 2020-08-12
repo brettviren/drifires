@@ -21,6 +21,24 @@ namespace drifires {
         if (j.contains("name"))
             j.at("name").get_to(obj.name);    
     }
+    // Converters for Area2d
+    // A 2D area bounding box
+    inline void to_json(json& j, const Area2d& obj) {
+        j["xmin"] = obj.xmin;
+        j["ymin"] = obj.ymin;
+        j["xmax"] = obj.xmax;
+        j["ymax"] = obj.ymax;
+    }
+    inline void from_json(const json& j, Area2d& obj) {
+        if (j.contains("xmin"))
+            j.at("xmin").get_to(obj.xmin);    
+        if (j.contains("ymin"))
+            j.at("ymin").get_to(obj.ymin);    
+        if (j.contains("xmax"))
+            j.at("xmax").get_to(obj.xmax);    
+        if (j.contains("ymax"))
+            j.at("ymax").get_to(obj.ymax);    
+    }
     // Converters for Binning
     // Partition a range into equal size bins
     inline void to_json(json& j, const Binning& obj) {
@@ -128,6 +146,27 @@ namespace drifires {
             j.at("temperature").get_to(obj.temperature);    
         if (j.contains("density"))
             j.at("density").get_to(obj.density);    
+    }
+    // Converters for PlotDriftsCfg
+    // Configuration for PlotDrifts
+    inline void to_json(json& j, const PlotDriftsCfg& obj) {
+        j["ystart"] = obj.ystart;
+        j["trange"] = obj.trange;
+        j["impacts"] = obj.impacts;
+        j["areas"] = obj.areas;
+        j["pdf"] = obj.pdf;
+    }
+    inline void from_json(const json& j, PlotDriftsCfg& obj) {
+        if (j.contains("ystart"))
+            j.at("ystart").get_to(obj.ystart);    
+        if (j.contains("trange"))
+            j.at("trange").get_to(obj.trange);    
+        if (j.contains("impacts"))
+            j.at("impacts").get_to(obj.impacts);    
+        if (j.contains("areas"))
+            j.at("areas").get_to(obj.areas);    
+        if (j.contains("pdf"))
+            j.at("pdf").get_to(obj.pdf);    
     }
 
 

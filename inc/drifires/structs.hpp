@@ -13,6 +13,14 @@ namespace drifires {
     };
 
 
+    struct Area2d{
+        double xmin;
+        double ymin;
+        double xmax;
+        double ymax;
+    };
+
+
     struct Binning{
         double lo;
         double hi;
@@ -58,6 +66,15 @@ namespace drifires {
     struct MediumLarCfg{
         double temperature;
         double density;
+    };
+
+
+    struct PlotDriftsCfg{
+        double ystart;
+        Binning trange;
+        std::vector<double> impacts;
+        std::vector<Area2d> areas;
+        std::string pdf;
     };
 
 
