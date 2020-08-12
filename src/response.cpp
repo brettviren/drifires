@@ -1,4 +1,6 @@
 #include "drifires/action.hpp"
+#include "drifires/configurable.hpp"
+#include "drifires/object.hpp"
 #include "drifires/util.hpp"
 
 #include <iostream>
@@ -7,64 +9,51 @@
 
 using namespace drifires;
 
-struct HalfRegionResponse : public Action {
-
-    Binning trange, irange;
-    double ystart;
-    int neighbors;
-    double nudge;
+struct HalfRegionResponse : public Action, public Configurable<HalfRegionResponseCfg> {
     double pitch;
     object FR;
-    //std::string filename;
 
-    virtual void configure(object cfg) {
-        cfg["neighbors"].get_to(neighbors);
-        cfg["nudge"].get_to(nudge);
-
-        cfg["ystart"].get_to(ystart);
-
-        cfg["trange"].get_to(trange);
-        cfg["irange"].get_to(irange);
-        // cfg["filename"].get_to(filename);
-
-        std::cerr << "response: irange: " << irange.nbins
-                  << ":["<<irange.lo/units::mm<<","<<irange.hi/units::mm<<"]mm"<<std::endl;
+    virtual void initialize() {
+        std::cerr << "response: irange: " << cfg.irange.nbins
+                  << ":["<<cfg.irange.lo/units::mm
+                  << ","<<cfg.irange.hi/units::mm<<"]mm"<<std::endl;
 
         // FR schema requires each type to be held with a key of the type name.
-        FR["FieldResponse"] = cfg["FieldResponse"];
+        // Here we do a weird thing and convert back to nlohmann::json object!
+        FR["FieldResponse"] = cfg.FieldResponse;
     }
 
     virtual object act(Component& cmp, Drifter& dft) {
         auto& sens = cmp.sensor();
         sens.SetArea();
-        sens.SetTimeWindow(trange.lo/gfunits::time, binsize(trange)/gfunits::time, trange.nbins);
+        sens.SetTimeWindow(cfg.trange.lo/gfunits::time, binsize(cfg.trange)/gfunits::time, cfg.trange.nbins);
         
         auto labels = cmp.readout_labels();
 
         std::vector<int> iwires;
-        for (int iwire=-neighbors; iwire<0; ++iwire) {
+        for (int iwire=-cfg.neighbors; iwire<0; ++iwire) {
             iwires.push_back(iwire);
         }
-        for (int iwire=0; iwire<=neighbors; ++iwire) {
+        for (int iwire=0; iwire<=cfg.neighbors; ++iwire) {
             iwires.push_back(iwire);
         }
 
 
-        auto impacts = edges(irange);
+        auto impacts = edges(cfg.irange);
         for (size_t ind=0; ind < impacts.size(); ++ind) {
             const double impact = impacts[ind];
             double impact_nudged = impact;
             if (ind == 0) {
-                impact_nudged += nudge;
+                impact_nudged += cfg.nudge;
             }
             if (ind == impacts.size() -1) {
-                impact_nudged -= nudge;
+                impact_nudged -= cfg.nudge;
             }
 
             std::cerr << "drift: #"<<ind
                       <<" at x="<<impact_nudged/units::mm << " mm"
-                      <<" y=" << ystart/units::mm << " mm"<< std::endl;
-            dft.drift_electron(impact_nudged, ystart, 0, 0);
+                      <<" y=" << cfg.ystart/units::mm << " mm"<< std::endl;
+            dft.drift_electron(impact_nudged, cfg.ystart, 0, 0);
 
             // .FieldResponse.planes[0].PlaneResponse.paths[0].PathResponse.current.array|keys'
             // [ "elements", "shape" ]
@@ -85,7 +74,7 @@ struct HalfRegionResponse : public Action {
                     // near wire0.
                     auto wname = wire_name(pname, -iwire);
                     object elements;
-                    for (int icur=0; icur<trange.nbins; ++icur) {
+                    for (int icur=0; icur<cfg.trange.nbins; ++icur) {
                         double sig = sens.GetElectronSignal(wname, icur)*gfunits::current;
                         elements.push_back(sig);
                     }

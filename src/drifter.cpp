@@ -1,13 +1,16 @@
 #include "drifires/drifter.hpp"
+#include "drifires/configurable.hpp"
 #include "drifires/util.hpp"
+#include "drifires/object.hpp"
 #include "Garfield/DriftLineRKF.hh"
 
 #include <iostream>
 
 #include "drifires/object.hpp"
-using RkfCfg = drifires::Stepper;
 
-struct driftlinerkf : public drifires::Drifter {
+using namespace drifires;
+
+struct driftlinerkf : public Drifter, public Configurable<Stepper> {
     Garfield::DriftLineRKF rkf;
     bool throw_ok{true};
 
@@ -29,8 +32,7 @@ struct driftlinerkf : public drifires::Drifter {
         }
     }
 
-    virtual void configure(drifires::object obj) {
-        RkfCfg cfg = obj;
+    virtual void initialize() {
         std::cerr << "RKF: acc=" << cfg.accuracy/units::mm
                   << " mm, max step=" << cfg.maxstep/units::mm << " mm" << std::endl;
         rkf.SetIntegrationAccuracy(cfg.accuracy/gfunits::length);

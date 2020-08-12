@@ -9,7 +9,7 @@ function(schema) {
         schema.field("temperature", os.double, 89.0*units.K, doc="Temperature"),
         schema.field("density", os.double, 1.3954*units.gram/units.cm3, doc="Density"),
         // FIXME: need to add a bunch more that are still hard coded!  
-    ], doc="Configuration for MediumLar"),
+    ], bases=[os.typename], doc="Configuration for MediumLar"),
 
     types: [lar],
 }

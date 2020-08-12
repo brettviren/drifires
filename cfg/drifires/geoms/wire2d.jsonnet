@@ -9,6 +9,8 @@ local util = import "drifires/util.jsonnet";
 
 function(det) 
 {
+    media: [ { type: "MediumLar", temperature: det.temperature}, ],
+
     // A drifires component constructs a Garfield ComponentBase.
     // Except for type: and optional name: the rest of the parameters
     // are specific to the type.
@@ -17,7 +19,7 @@ function(det)
         // 2D cathode + wire anode planes and maybe "grid" and "mesh" planes
 
         // Medium is intrinsic to the component
-        medium : { type: "MediumLar", temperature: det.temperature},
+        medium : { type: "MediumLar" },
 
         // if <= 0 then no periodic boundary conditions.
         //periodicity: det.nwires*det.wire_pitch,

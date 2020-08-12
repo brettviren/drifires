@@ -1,4 +1,5 @@
 #include "drifires/action.hpp"
+#include "drifires/configurable.hpp"
 #include "drifires/util.hpp"
 #include "drifires/object.hpp"
 
@@ -12,13 +13,7 @@
 
 using namespace drifires;
 
-struct PlotDrifts : public Action {
-
-    drifires::PlotDriftsCfg cfg;
-
-    virtual void configure(object obj) {
-        cfg = obj;
-    }
+struct PlotDrifts : public Action, public Configurable<PlotDriftsCfg> {
 
     virtual object act(Component& cmp, Drifter& dft) {
         auto& sens = cmp.sensor();
@@ -29,11 +24,6 @@ struct PlotDrifts : public Action {
         
         Garfield::ViewDrift driftView;
         dft.enable_plotting(driftView);
-        // auto bb = cmp.bounds();
-        // driftView.SetArea(bb[0].first/gfunits::length,
-        //                   bb[1].first/gfunits::length,
-        //                   bb[0].second/gfunits::length,
-        //                   bb[1].second/gfunits::length);
         driftView.SetArea();
 
         for (const auto& imp : cfg.impacts) {

@@ -12,7 +12,7 @@ function(schema) {
 
     typename: schema.record("TypeName", fields=[
         schema.field("type", $.ident, doc="A registered type name"),
-        schema.field("name", $.ident, "", doc="An instance name"),
+        schema.field("name", $.ident, '""', doc="An instance name"),
     ], doc="Describe an instance of a type"),
 
     double: schema.number("Double", dtype="f8"),

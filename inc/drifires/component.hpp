@@ -15,8 +15,6 @@ namespace drifires {
     // fixme: the name "Component" doesn't quite match the semantics
     // of garfield as it also populates the sensor.
     struct Component {
-        // Configure self
-        virtual void configure(drifires::object cfg) = 0;
 
         // Return reference to built component.
         virtual Garfield::ComponentBase& component() = 0;

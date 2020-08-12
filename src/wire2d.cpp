@@ -1,17 +1,14 @@
 #include "drifires/component.hpp"
 #include "drifires/medium.hpp"
+#include "drifires/configurable.hpp"
 #include "drifires/util.hpp"
+#include "drifires/object.hpp"
 
 #include "Garfield/ComponentAnalyticField.hh"
 
 #include <iostream>
 
-
-#include "drifires/object.hpp"
-using AWLayer = drifires::Layer;
-using AWCfg = drifires::Layered;
-
-struct AnalyticWire2D : public drifires::Component {
+struct AnalyticWire2D : public drifires::Component, public drifires::Configurable<drifires::Layered> {
     Garfield::ComponentAnalyticField cmp;
     Garfield::Sensor sens;
 
@@ -23,22 +20,18 @@ struct AnalyticWire2D : public drifires::Component {
 
     virtual Garfield::ComponentBase& component() { return cmp; }
 
-    //drifires::BoundingBox bb;
-    //virtual drifires::BoundingBox bounds() { return bb; }
-
     virtual void enable_view(Garfield::ViewCell& vc) {
         vc.SetComponent(&cmp);
     }
 
-    virtual void configure(drifires::object cfgobj) {
+    virtual void initialize() {
 
         // medium is intrisic to the component
-        auto& med = drifires::medium(cfgobj["medium"]);
+        auto& med = drifires::medium(cfg.medium);
         cmp.SetMedium(&med.medium());
 
         sens.AddComponent(&cmp);
 
-        AWCfg cfg = cfgobj;        
         double ymin=1, ymax=-1;
 
         for (auto& layer : cfg.layers) {
@@ -99,7 +92,7 @@ struct AnalyticWire2D : public drifires::Component {
 
         sens.EnableComponent(0, true);
 
-    } // configure
+    } // initialize
 
     Garfield::Sensor& sensor() { return sens; };
 

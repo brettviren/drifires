@@ -8,7 +8,6 @@ namespace drifires {
 
     struct Action {
         virtual object act(Component& cmp, Drifter& dft) = 0;
-        virtual void configure(object cfg) = 0;
     };
 
     // Get a configured action

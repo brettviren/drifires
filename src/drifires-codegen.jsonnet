@@ -5,6 +5,7 @@ local schemas = [
     import "drifter-schema.jsonnet",
     import "medium-schema.jsonnet",
     import "plots-schema.jsonnet",
+    import "response-schema.jsonnet",
 ];
 local cg = moo.schema.avro.codegen;
 

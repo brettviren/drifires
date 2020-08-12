@@ -7,6 +7,7 @@
 #include <map>
 
 #include "drifires/object.hpp"
+#include "drifires/configurable.hpp"
 
 namespace drifires {
 
@@ -98,7 +99,9 @@ namespace drifires {
     Type& factory_getcfg(drifires::object cfg) {
         TypeName tn = cfg.get<TypeName>();
         Type* ret = factory<Type>(tn.type).get(tn.name);
-        ret->configure(cfg);
+        ConfigurableBase* cb = dynamic_cast<ConfigurableBase*>(ret);
+        if (cb)
+            cb->configure(cfg);
         return *ret;
     }
 

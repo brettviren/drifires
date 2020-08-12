@@ -6,11 +6,10 @@ function(schema) {
     local os = oschema(schema),
 
     local stepper = schema.record("Stepper", fields=[
-        schema.field("tn", os.typename, doc="The type and instance names"),
         schema.field("accuracy", os.double, 1e-9*units.cm, doc="Max (in)accuracy distance"),
         schema.field("maxstep", os.double, 1*units.mm, doc="Max (in)accuracy distance"),
         schema.field("throw_ok", os.bool),
-    ], doc = "Stepper configuration"),
+    ], bases=[os.typename], doc = "Stepper configuration"),
 
     types: [stepper]
 

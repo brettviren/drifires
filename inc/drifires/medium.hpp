@@ -9,7 +9,6 @@
 namespace drifires {
     struct Medium {
         virtual Garfield::Medium& medium() = 0;
-        virtual void configure(drifires::object cfg) = 0;
     };
 
     // Get a configured medium.

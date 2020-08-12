@@ -48,22 +48,21 @@ namespace drifires {
     };
 
 
-    struct Layered{
-        TypeName tn;
+    struct Layered : public TypeName {
         double periodicity;
         std::vector<Layer> layers;
+        TypeName medium;
     };
 
 
-    struct Stepper{
-        TypeName tn;
+    struct Stepper : public TypeName {
         double accuracy;
         double maxstep;
         bool throw_ok;
     };
 
 
-    struct MediumLarCfg{
+    struct MediumLarCfg : public TypeName {
         double temperature;
         double density;
     };
@@ -75,6 +74,44 @@ namespace drifires {
         std::vector<double> impacts;
         std::vector<Area2d> areas;
         std::string pdf;
+    };
+
+
+    struct PlotDiagCfg{
+        int dummy;
+    };
+
+
+    struct PlaneResponseStub{
+        int planeid;
+        double location;
+        double pitch;
+    };
+
+
+    struct PlaneResponseWrap{
+        std::string name;
+        PlaneResponseStub PlaneResponse;
+    };
+
+
+    struct FieldResponseStub{
+        std::vector<PlaneResponseWrap> planes;
+        std::vector<double> axis;
+        double tstart;
+        double origin;
+        double period;
+        double speed;
+    };
+
+
+    struct HalfRegionResponseCfg{
+        Binning trange;
+        Binning irange;
+        double ystart;
+        int neighbors;
+        double nudge;
+        FieldResponseStub FieldResponse;
     };
 
 

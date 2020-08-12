@@ -37,8 +37,16 @@ namespace {{ model.namespace }} {
         from_json(j, ({{b.type}}&)obj);
         {% endfor %}
         {% for f in t.fields if not f.name.startswith("_base_") %}
-        if (j.contains("{{f.name}}"))
-            j.at("{{f.name}}").get_to(obj.{{f.name}});    
+        if (j.contains("{{f.name}}")) {
+            j.at("{{f.name}}").get_to(obj.{{f.name}});
+        }
+        else {
+            {% if f.default is defined %}
+            obj.{{f.name}} = {{ f.default }};
+            {% else %}
+            throw std::runtime_error("required field not provided: \"{{t.name}}::{{f.name}}\"");
+            {% endif %}
+        }
         {% endfor%}
     }
     {% endif %}

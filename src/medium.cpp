@@ -3,8 +3,6 @@
 #include "drifires/util.hpp"
 
 #include "drifires/object.hpp"
-using LarCfg = drifires::MediumLarCfg;
-
 
 drifires::Medium& drifires::medium(drifires::object cfg)
 {
@@ -13,11 +11,10 @@ drifires::Medium& drifires::medium(drifires::object cfg)
 
 
 #include "drifires/MediumLar.hpp"
-struct mediumlar : public drifires::Medium {
+struct mediumlar : public drifires::Medium, public drifires::Configurable<drifires::MediumLarCfg> {
     Garfield::MediumLar med;
     Garfield::Medium& medium() { return med; }
-    void configure(drifires::object obj) {
-        auto cfg = obj.get<LarCfg>();
+    void initialize() {
         med.SetTemperature(cfg.temperature/gfunits::temperature);
         med.SetMassDensity(cfg.density/gfunits::density);
     }
