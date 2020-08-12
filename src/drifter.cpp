@@ -4,23 +4,8 @@
 
 #include <iostream>
 
-using drifires::maybe_to;
-
-struct RkfCfg {
-    drifires::TypeName tn;
-    double accuracy{0.000001*units::cm};
-    double maxstep{1*units::mm};
-    bool throw_ok{true};
-};
-
-
-void from_json(const drifires::object& j, RkfCfg& c)
-{
-    from_json(j, c.tn);
-    maybe_to(j, "accuracy", c.accuracy);
-    maybe_to(j, "maxstep", c.maxstep);
-    maybe_to(j, "throw_ok", c.throw_ok);
-}
+#include "drifires/object.hpp"
+using RkfCfg = drifires::Stepper;
 
 struct driftlinerkf : public drifires::Drifter {
     Garfield::DriftLineRKF rkf;

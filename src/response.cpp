@@ -37,7 +37,7 @@ struct HalfRegionResponse : public Action {
     virtual object act(Component& cmp, Drifter& dft) {
         auto& sens = cmp.sensor();
         sens.SetArea();
-        sens.SetTimeWindow(trange.lo/gfunits::time, trange.binsize()/gfunits::time, trange.nbins);
+        sens.SetTimeWindow(trange.lo/gfunits::time, binsize(trange)/gfunits::time, trange.nbins);
         
         auto labels = cmp.readout_labels();
 
@@ -50,7 +50,7 @@ struct HalfRegionResponse : public Action {
         }
 
 
-        auto impacts = irange.edges();
+        auto impacts = edges(irange);
         for (size_t ind=0; ind < impacts.size(); ++ind) {
             const double impact = impacts[ind];
             double impact_nudged = impact;

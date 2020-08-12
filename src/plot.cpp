@@ -27,7 +27,7 @@ struct PlotDrifts : public Action {
         auto& sens = cmp.sensor();
         sens.SetArea();
         sens.SetTimeWindow(trange.lo/gfunits::time,
-                           trange.binsize()/gfunits::time, trange.nbins);
+                           binsize(trange)/gfunits::time, trange.nbins);
 
         
         Garfield::ViewDrift driftView;

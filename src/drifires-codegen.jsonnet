@@ -3,6 +3,7 @@ local schemas = [
     import "object-schema.jsonnet",
     import "wire2d-schema.jsonnet",
     import "drifter-schema.jsonnet",
+    import "medium-schema.jsonnet",
 ];
 local cg = moo.schema.avro.codegen;
 
@@ -11,4 +12,7 @@ local multischema(ss) = function(schema) {
 };
 
 //multischema([os])(moo.schema.avro)
-cg("drifires", multischema(schemas), "drifires")
+cg("drifires", multischema(schemas), "drifires") + {
+    pkgincdir: "drifires",
+    structinc: "structs.hpp",
+}

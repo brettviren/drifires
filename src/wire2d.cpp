@@ -6,47 +6,10 @@
 
 #include <iostream>
 
-using drifires::maybe_to;
 
-struct AWLayer {
-    std::string name;
-    double loc;                 // cm, location in y
-    double pot;                 // V, potential
-    bool readout{false};        
-    int nwires{0};              // 0 if plane, else below also set
-    int nextra{0};              // extra wires on either side of central nwires
-    double pitch{0.0};          // cm, dist between wires
-    double dia{0.0};            // cm, wire diameter
-};
-void from_json(const drifires::object& j, AWLayer& l) {
-    j.at("name").get_to(l.name);
-    j.at("loc").get_to(l.loc);
-    j.at("pot").get_to(l.pot);
-    if (j.count("nwires") and j.at("nwires").get<int>() > 0) {
-        j.at("nwires").get_to(l.nwires);
-        j.at("nextra").get_to(l.nextra);
-        j.at("pitch").get_to(l.pitch);
-        j.at("dia").get_to(l.dia);
-    }
-    if (j.count("readout")) {
-        j.at("readout").get_to(l.readout);
-    }
-    else {
-        l.readout = false;
-    }
-}
-
-struct AWCfg {
-    drifires::TypeName tn;
-    double periodicity{-1};
-    std::vector<AWLayer> layers;
-};
-void from_json(const drifires::object j, AWCfg& c) {
-    from_json(j, c.tn);
-    maybe_to(j, "periodicity", c.periodicity);
-    c.layers = j.at("layers").get<std::vector<AWLayer>>();
-}
-
+#include "drifires/object.hpp"
+using AWLayer = drifires::Layer;
+using AWCfg = drifires::Layered;
 
 struct AnalyticWire2D : public drifires::Component {
     Garfield::ComponentAnalyticField cmp;

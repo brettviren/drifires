@@ -68,6 +68,27 @@ def configure(cfg):
 def build(bld):
     uses='NLJS GARFIELDPP ROOT'.split()
 
+
+    if bld.env.DO_CODEGEN:
+        print("codegen")
+        incdir = bld.path.find_dir("inc/drifires")
+        codegen = bld.path.find_resource("src/drifires-codegen.jsonnet")
+        imports = bld.env.MOO[0] + " imports " + codegen.abspath()
+        imports = subprocess.check_output(imports, shell=True)
+        imports = imports.decode().split("\n")
+        imports = [bld.root.find_node(im) for im in imports]
+        name = codegen.name.replace("-codegen.jsonnet","")
+        for ttype in ["nljs", "structs"]:
+            tmpl = bld.path.find_resource('src/'+ttype+'.hpp.j2')
+            assert(tmpl)
+            print(codegen,tmpl)
+            tgt = incdir.make_node("%s.hpp" % ttype)
+            bld(name = 'codegen_' + ttype,
+                rule="${MOO} render -o ${TGT} ${SRC[0].abspath()} ${SRC[1].abspath()}",
+                source=[codegen,tmpl]+imports, target=[tgt])
+        bld.add_group()         # want this to finish first 
+    
+
     rpath = [bld.env["PREFIX"] + '/lib',
              bld.path.find_or_declare(bld.out_dir)]
     #rpath += [bld.env["LIBPATH_%s"%u][0] for u in uses]
@@ -75,13 +96,12 @@ def build(bld):
 
     sources = bld.path.ant_glob('src/*.cpp')
 
-
     bld.shlib(features='cxx', includes='inc', 
               source = sources, target='drifires',
               uselib_store='DRIFIRES', use=uses)
 
     bld.install_files('${PREFIX}/include/drifires',
-                      bld.path.ant_glob("inc/drifires/**/*.hpp"),
+                      bld.path.ant_glob("inc/drifires/*.hpp"),
                       cwd=bld.path.find_dir('inc/drifires'),
                       install_path=bld.env.PREFIX + '/lib',
                       relative_trick=True)                      
@@ -101,17 +121,3 @@ def build(bld):
                 rpath = rpath,
                 use = ['drifires'] + uses)
 
-    if bld.env.DO_CODEGEN:
-        print("codegen")
-        srcdir = bld.path.find_dir("src")
-        for codegen in bld.path.ant_glob("src/*-codegen.jsonnet"):
-            imports = bld.env.MOO[0] + " imports " + codegen.abspath()
-            imports = subprocess.check_output(imports, shell=True)
-            imports = imports.decode().split("\n")
-            imports = [bld.root.find_node(im) for im in imports]
-            name = codegen.name.replace("-codegen.jsonnet","")
-            for tmpl in ["nljs", "structs"]:
-                tgt = srcdir.make_node("%s_%s.hpp" % (name, tmpl))
-                bld(rule="${MOO} render -o ${TGT} ${SRC[0].abspath()} avro_%s.hpp.j2" % tmpl,
-                    source=[codegen]+imports, target=[tgt])
-    

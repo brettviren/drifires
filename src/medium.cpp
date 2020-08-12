@@ -2,25 +2,14 @@
 #include "drifires/factory.hpp"
 #include "drifires/util.hpp"
 
-using drifires::maybe_to;
+#include "drifires/object.hpp"
+using LarCfg = drifires::MediumLarCfg;
+
 
 drifires::Medium& drifires::medium(drifires::object cfg)
 {
     return drifires::factory_getcfg<drifires::Medium>(cfg);
 }
-
-// Hook in Garfield media
-
-struct LarCfg {
-    double temperature{89.0*units::K};
-    double density{1.3954*units::gram/units::cm3};
-};
-void from_json(const drifires::object& j, LarCfg c)
-{
-    maybe_to(j, "temperature", c.temperature);
-    maybe_to(j, "density", c.density);
-}
-
 
 
 #include "drifires/MediumLar.hpp"

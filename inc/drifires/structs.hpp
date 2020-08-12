@@ -14,44 +14,50 @@ namespace drifires {
 
 
     struct Binning{
-        float lo;
-        float hi;
+        double lo;
+        double hi;
         int nbins;
     };
 
 
     struct Point{
-        float x;
-        float y;
-        float z;
-        float t;
+        double x;
+        double y;
+        double z;
+        double t;
     };
 
 
     struct Layer{
         std::string name;
-        float loc;
-        float pot;
+        double loc;
+        double pot;
         bool readout;
         int nwires;
         int nextra;
-        float pitch;
-        float dia;
+        double pitch;
+        double dia;
     };
 
 
     struct Layered{
         TypeName tn;
-        float periodicity;
+        double periodicity;
         std::vector<Layer> layers;
     };
 
 
     struct Stepper{
         TypeName tn;
-        float accuracy;
-        float maxstep;
+        double accuracy;
+        double maxstep;
         bool throw_ok;
+    };
+
+
+    struct MediumLarCfg{
+        double temperature;
+        double density;
     };
 
 
