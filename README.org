@@ -13,7 +13,7 @@ use with Wire-Cell Toolkit.
 
 ** Requirements
 
-- C++ compiler, Python (for "waf")
+- C++ compiler, cmake
 - ~nlohmann::json~
 - ROOT
 - Garfield++
@@ -22,17 +22,29 @@ use with Wire-Cell Toolkit.
 
 ** Build
 
+Assuming your dependencies are in =local/=:
+
 #+begin_example
-  $ wget -O waf https://waf.io/waf-2.0.20
-  $ chmod +x waf
-  $ ./waf configure build install \
-     --prefix          $HOME/opt/drifires \
-     --with-nljs       $HOME/opt/nljs \
-     --with-garfieldpp $HOME/opt/garfieldpp \
-     --with-root       $HOME/opt/root
+  $ git clone https://github.com/brettviren/drifires.git
+
+  # configure
+  $ cmake -S drifiers -B build \
+          -DCMAKE_PREFIX_PATH="$PWD/local" \
+          -DCMAKE_INSTALL_PREFIX="$PWD/install"
+
+  # build and install
+  $ cmake --build build -j
+  $ cmake --install build
 #+end_example
 
-Adjust paths to match your environment.
+If you need to specify exact locations to dependencies, add one or more of the
+following to the configure command:
+
+#+begin_example
+-DWITH_GARFIELDPP:PATH=/path/to/garfieldpp/prefix
+-DWITH_NLJS:PATH=/path/to/nlohmann-json/prefix
+-DWITH_ROOT:PATH=/path/to/root/prefix
+#+end_example
 
 * Running
 
