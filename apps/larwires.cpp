@@ -4,7 +4,8 @@
 #include "Garfield/ViewMedium.hh"
 #include "Garfield/ViewField.hh"
 #include "Garfield/ViewCell.hh"
-#include "Garfield/Plotting.hh"
+#include "Garfield/ViewBase.hh"
+#include "Garfield/ViewDrift.hh"
 #include "Garfield/DriftLineRKF.hh"
 #include "Garfield/ViewSignal.hh"
 
@@ -158,7 +159,7 @@ int main(int argc, char * argv[])
 {
 
     TApplication app("app", &argc, argv);
-    plottingEngine.SetDefaultStyle();
+    Garfield::SetDefaultStyle();
 
     //using MyMedium = class MediumMagboltz;
     using MyMedium = class MediumLar;

@@ -3,7 +3,7 @@
 
 #include "drifires/object.hpp"
 
-#include "Garfield/ComponentBase.hh"
+#include "Garfield/Component.hh"
 #include "Garfield/Sensor.hh"
 #include "Garfield/ViewCell.hh"
 
@@ -17,7 +17,7 @@ namespace drifires {
     struct Component {
 
         // Return reference to built component.
-        virtual Garfield::ComponentBase& component() = 0;
+        virtual Garfield::Component& component() = 0;
         // Return reference to built sensor
         virtual Garfield::Sensor& sensor() = 0;
 

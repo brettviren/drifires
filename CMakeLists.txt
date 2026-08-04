@@ -77,7 +77,15 @@ set(ROOT_TARGETS
 # ---------------------------------------------------------------------------
 # Compiler settings, mirroring the waf configure() CXXFLAGS.
 # ---------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 17)
+# ROOT requires that consumers compile with at least the same C++ standard ROOT
+# itself was built with; otherwise its headers emit a #warning (fatal here under
+# -Werror).  ROOTConfig.cmake exports ROOT_CXX_STANDARD, so track it when found
+# and fall back to C++17 (the minimum this code was written against) otherwise.
+if(DEFINED ROOT_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD "${ROOT_CXX_STANDARD}")
+else()
+  set(CMAKE_CXX_STANDARD 17)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

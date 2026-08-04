@@ -18,7 +18,7 @@ struct AnalyticWire2D : public drifires::Component, public drifires::Configurabl
         return readouts;
     }
 
-    virtual Garfield::ComponentBase& component() { return cmp; }
+    virtual Garfield::Component& component() { return cmp; }
 
     virtual void enable_view(Garfield::ViewCell& vc) {
         vc.SetComponent(&cmp);

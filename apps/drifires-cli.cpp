@@ -1,6 +1,6 @@
 #include "drifires/functions.hpp"
 
-#include "Garfield/Plotting.hh"
+#include "Garfield/ViewBase.hh"
 
 #include "TApplication.h"
 
