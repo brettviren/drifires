@@ -8,3 +8,4 @@ feh_*
 auto
 latexmk-out
 .claude
+*.pdf
